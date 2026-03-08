@@ -11,7 +11,7 @@ const tools = [
   },
   {
     name: 'Lise Taban Puanları',
-    description: '2024 yılı lise taban puanları, kontenjanlar ve yüzdelik dilimler.',
+    description: '2025 yılı lise taban puanları, kontenjanlar ve yüzdelik dilimler.',
     href: '/araclar/taban-puanlari',
     icon: School,
     color: 'bg-green-500/10 text-green-500 border-green-500/20',
