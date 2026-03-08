@@ -144,7 +144,7 @@ export default function TercihRobotuPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">İl</label>
                 <select
@@ -155,7 +155,6 @@ export default function TercihRobotuPage() {
                   {ILLER.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
               </div>
-            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Okul Türü</label>
                 <select
