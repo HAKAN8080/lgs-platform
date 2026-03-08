@@ -85,10 +85,12 @@ export function stratejiHesapla(
     const seviye = seviyeHesapla(netYuzdesi);
     const trend = trendHesapla(netDizisi);
 
-    // Öncelik puanı = seviye puanı ± trend
-    let oncelikPuani = SEVIYE_PUAN[seviye];
-    if (trend === 'düşüş') oncelikPuani += 1;
-    if (trend === 'artış') oncelikPuani = Math.max(1, oncelikPuani - 1);
+    // Ağırlık = (100 - netYuzdesi) → zayıf ders daha fazla saat alır
+    // Minimum 5 puan taban (hiç sıfıra düşmesin)
+    // Trend düzeltmesi: düşüş +15, artış -10 (nispi fark yaratır)
+    let oncelikPuani = Math.max(5, 100 - netYuzdesi);
+    if (trend === 'düşüş') oncelikPuani = Math.min(100, oncelikPuani + 15);
+    if (trend === 'artış') oncelikPuani = Math.max(5, oncelikPuani - 10);
 
     return {
       key,
