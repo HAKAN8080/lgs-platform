@@ -15,6 +15,7 @@ interface UserData {
     status: string
   }
   profile: {
+    lgsYear: string | null
     targetScore: number | null
     province: string | null
     district: string | null
