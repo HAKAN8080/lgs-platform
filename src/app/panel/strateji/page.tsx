@@ -43,7 +43,8 @@ const KEY_MAP: Record<string, DersKey> = {
 export default function StratejiPage() {
   const { user, loading: authLoading } = useAuth();
   const [mod, setMod] = useState<'otomatik' | 'manuel'>('otomatik');
-  const [sonuc, setSonuc] = useState<StratejSonuc | null>(null);
+  const [otomatikSonuc, setOtomatikSonuc] = useState<StratejSonuc | null>(null);
+  const [manuelSonuc, setManuelSonuc] = useState<StratejSonuc | null>(null);
   const [musaitlik, setMusaitlik] = useState<Record<string, number[]>>({});
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
@@ -79,7 +80,7 @@ export default function StratejiPage() {
         const programSnap = await getDoc(programRef);
         const musaitlikData = programSnap.exists() ? programSnap.data().musaitlik : {};
         setMusaitlik(musaitlikData);
-        setSonuc(stratejiHesapla(denemeler, musaitlikData));
+        setOtomatikSonuc(stratejiHesapla(denemeler, musaitlikData));
       } catch (e) {
         console.error(e);
         setHata('Veriler yüklenirken bir hata oluştu.');
@@ -97,7 +98,7 @@ export default function StratejiPage() {
       netler[d.key] = parseFloat(manuelNetler[d.key] || '0') || 0;
     }
     // Tek "deneme" olarak ver, trend yetersiz_veri çıkar
-    setSonuc(stratejiHesapla([netler], musaitlik));
+    setManuelSonuc(stratejiHesapla([netler], musaitlik));
   };
 
   if (authLoading || yukleniyor) {
@@ -125,7 +126,8 @@ export default function StratejiPage() {
     );
   }
 
-  const { dersler, toplamMusaitSaat, anaSaatHavuzu, araSaatHavuzu, genelMesaj } = sonuc!;
+  const sonuc = mod === 'otomatik' ? otomatikSonuc : manuelSonuc;
+  const { dersler = [], toplamMusaitSaat = 0, anaSaatHavuzu = 0, araSaatHavuzu = 0, genelMesaj = '' } = sonuc ?? {};
   const anaGrup = dersler.filter((d) => d.grup === 'ana');
   const araGrup = dersler.filter((d) => d.grup === 'ara');
   const uyarilar = dersler.filter((d) => d.uyari);
