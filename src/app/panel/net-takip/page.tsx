@@ -41,19 +41,25 @@ const DERSLER = [
 
 // Karne kayıtlarındaki farklı key formatlarını normalize et
 const KEY_ALTS: Record<string, string> = {
-  turkce: 'turkce', türkçe: 'turkce', 'türkçe': 'turkce',
+  turkce: 'turkce',
   matematik: 'matematik', math: 'matematik',
   fen: 'fen',
-  inkilap: 'inkilap', inkılap: 'inkilap', 'i̇nkılap': 'inkilap', tarih: 'inkilap',
+  inkilap: 'inkilap', tarih: 'inkilap',
   din: 'din',
-  ingilizce: 'ingilizce', 'i̇ngilizce': 'ingilizce', english: 'ingilizce',
+  ingilizce: 'ingilizce', english: 'ingilizce',
+}
+
+function normalizeKey(raw: string): string {
+  const s = raw.toLowerCase().trim()
+    .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g').replace(/ş/g, 's').replace(/ç/g, 'c')
+  return KEY_ALTS[s] ?? KEY_ALTS[raw.toLowerCase().trim()] ?? raw.toLowerCase().trim()
 }
 
 function normalizeNetler(raw: Record<string, number>): Record<string, number> {
   const result: Record<string, number> = {}
   for (const [k, v] of Object.entries(raw)) {
-    const norm = KEY_ALTS[k.toLowerCase().trim()] ?? k
-    result[norm] = v
+    result[normalizeKey(k)] = v
   }
   return result
 }
