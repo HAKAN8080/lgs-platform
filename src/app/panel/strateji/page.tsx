@@ -44,7 +44,7 @@ export default function StratejiPage() {
         const tumDenemeler = snap.docs
           .map((d) => d.data())
           .sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime())
-          .slice(0, 3);
+          .slice(0, 5);
         // Karne verilerinde key'ler tam isim olabilir, normalize et
         const KEY_MAP: Record<string, DersKey> = {
           'Türkçe': 'turkce', 'turkce': 'turkce',
@@ -119,7 +119,7 @@ export default function StratejiPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Haftalık Çalışma Stratejisi</h1>
         <p className="text-muted-foreground mt-1 text-sm">
-          Son 3 deneme sonucuna ve çalışma programına göre hesaplanmıştır.
+          Son 5 deneme sonucuna ve çalışma programına göre hesaplanmıştır.
         </p>
       </div>
 
