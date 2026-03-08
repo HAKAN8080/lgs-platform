@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock } from 'lucide-react'
+import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock, CalendarDays } from 'lucide-react'
 
 const tools = [
   {
@@ -25,6 +25,13 @@ const tools = [
     href: '/araclar/tercih-robotu',
     icon: Bot,
     color: 'bg-orange-500/10 text-orange-500',
+  },
+  {
+    name: 'Çalışma Programı Oluşturucu',
+    description: 'Müsaitliğine göre kişisel haftalık program oluştur',
+    href: '/icerik/calisma-programi',
+    icon: CalendarDays,
+    color: 'bg-purple-500/10 text-purple-500',
   },
 ]
 

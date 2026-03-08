@@ -15,6 +15,7 @@ const navigation = [
       { name: 'LGS Puan Hesaplama', href: '/araclar/puan-hesaplama' },
       { name: 'Lise Taban Puanları', href: '/araclar/taban-puanlari' },
       { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
+      { name: 'Çalışma Programı', href: '/icerik/calisma-programi' },
     ],
   },
   {
