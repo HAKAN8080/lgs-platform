@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, ElementType } from 'react'
 import { SCHOOLS_DATA, SCHOOL_TYPES, getSchoolTypeColor } from '@/lib/constants/schools'
 import { Bot, ChevronDown, ChevronUp, MapPin, Users, Star, Target, TrendingUp } from 'lucide-react'
 
@@ -45,7 +45,7 @@ export default function TercihRobotuPage() {
     const hedef = filtered.filter(s => s.puan - puanNum > 0 && s.puan - puanNum <= 25).sort((a, b) => a.puan - b.puan)
 
     return { kesin, sinirda, hedef }
-  }, [searched, puan, puanNum, tur, dil])
+  }, [searched, puan, puanNum, il, tur, dil])
 
   const total = results.kesin.length + results.sinirda.length + results.hedef.length
 
@@ -83,7 +83,7 @@ export default function TercihRobotuPage() {
   }: {
     id: string
     label: string
-    icon: React.ElementType
+    icon: ElementType
     color: string
     schools: typeof SCHOOLS_DATA
     emptyText: string
