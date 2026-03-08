@@ -209,6 +209,29 @@ export default function KarneEklePage() {
       return results
     }
 
+    // ÜÇDÖRTBEŞ Formatı: "Türkçe 20 20 0 20,00 100 ..." (SoruSayısı Doğru Yanlış Net%)
+    if (format === 'ucdortbes') {
+      const udbMap: Record<string, string> = {
+        'Türkçe': 'turkce',
+        'Matematik': 'matematik',
+        'Fen': 'fen',
+        'Tarih': 'inkilap',
+        'Din K.ve A.B.': 'din',
+        'İngilizce': 'ingilizce',
+      }
+      const udbPattern = /(Türkçe|Matematik|Fen|Tarih|Din K\.ve A\.B\.|İngilizce)\s+(\d+)\s+(\d+)\s+(\d+)\s+([\d,]+)/g
+      let m
+      while ((m = udbPattern.exec(text)) !== null) {
+        const key = udbMap[m[1]]
+        if (!key || results.find(r => r.ders === key)) continue
+        const dogru = parseInt(m[3])
+        const yanlis = parseInt(m[4])
+        const net = parseFloat(m[5].replace(',', '.'))
+        results.push({ ders: key, dogru, yanlis, net })
+      }
+      return results
+    }
+
     // HIZ Formatı: "TÜRKÇE 8.SINIF   20   20   0   0   20,00   11,63"
     // Format: Ders Adı | Soru Sayısı | Doğru | Yanlış | Boş | Net | Genel Ort
     // Tüm olası ders adı varyasyonlarını yakala
