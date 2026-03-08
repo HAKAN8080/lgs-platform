@@ -116,10 +116,23 @@ export function stratejiHesapla(
   const araGrup = dersler.filter((d) => d.grup === 'ara');
 
   const dagilimHesapla = (grup: DersStrateji[], havuz: number) => {
+    const n = grup.length;
+    // Minimum = eşit dağılımın 1/3'ü (ders sayısı ve havuza göre otomatik ölçeklenir)
+    const minSaat = Math.max(1, Math.ceil(havuz / n / 3));
     const toplamPuan = grup.reduce((t, d) => t + d.oncelikPuani, 0);
+
     grup.forEach((d) => {
-      d.onerilen = Math.round((havuz * d.oncelikPuani) / toplamPuan);
+      d.onerilen = Math.max(minSaat, Math.round((havuz * d.oncelikPuani) / toplamPuan));
     });
+
+    // Minimum ekleme nedeniyle havuzu aşarsa en yüksek saat alan dersten azalt
+    let toplam = grup.reduce((t, d) => t + d.onerilen, 0);
+    while (toplam > havuz) {
+      const maxDers = grup.reduce((a, b) => b.onerilen > a.onerilen ? b : a);
+      if (maxDers.onerilen <= minSaat) break;
+      maxDers.onerilen--;
+      toplam--;
+    }
   };
 
   dagilimHesapla(anaGrup, anaSaatHavuzu);
