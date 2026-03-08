@@ -18,6 +18,8 @@ export default function KayitPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [lgsYear, setLgsYear] = useState('2025')
+  const [targetScore, setTargetScore] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -60,7 +62,10 @@ export default function KayitPage() {
     setLoading(true)
 
     try {
-      await signUpWithEmail(email, password, displayName)
+      await signUpWithEmail(email, password, displayName, {
+        lgsYear,
+        targetScore: targetScore ? parseInt(targetScore) : undefined
+      })
       router.push('/panel')
     } catch (err: any) {
       console.error(err)
@@ -124,6 +129,32 @@ export default function KayitPage() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Hangi yıl LGS&apos;ye gireceksin?</label>
+              <select
+                value={lgsYear}
+                onChange={(e) => setLgsYear(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              >
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Hedef Puan (opsiyonel)</label>
+              <Input
+                type="number"
+                placeholder="Örn: 450"
+                value={targetScore}
+                onChange={(e) => setTargetScore(e.target.value)}
+                min="200"
+                max="500"
+              />
             </div>
 
             <div className="space-y-2">

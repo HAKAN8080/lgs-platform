@@ -22,7 +22,8 @@ import {
   Calendar,
   Loader2,
   Plus,
-  Trash2
+  Trash2,
+  Clock
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -101,12 +102,44 @@ export default function PanelPage() {
   const { isPremium, plan } = usePremium()
   const [denemeler, setDenemeler] = useState<Deneme[]>([])
   const [loadingDenemeler, setLoadingDenemeler] = useState(true)
+  const [daysUntilLGS, setDaysUntilLGS] = useState(0)
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/giris')
     }
   }, [user, loading, router])
+
+  // LGS'ye kalan günleri hesapla
+  useEffect(() => {
+    const calculateDaysUntilLGS = () => {
+      const lgsYear = userData?.profile?.lgsYear
+      if (!lgsYear) return
+
+      // LGS tarihleri (Haziran ayının 2. Pazar günü genelde)
+      const lgsDates: Record<string, string> = {
+        '2026': '2026-06-14',
+        '2027': '2027-06-13',
+        '2028': '2028-06-11',
+      }
+
+      const lgsDate = lgsDates[lgsYear]
+      if (!lgsDate) return
+
+      const now = new Date().getTime()
+      const target = new Date(lgsDate + 'T10:00:00').getTime()
+      const difference = target - now
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+
+      setDaysUntilLGS(days > 0 ? days : 0)
+    }
+
+    if (userData) {
+      calculateDaysUntilLGS()
+      const timer = setInterval(calculateDaysUntilLGS, 1000 * 60 * 60) // Her saat güncelle
+      return () => clearInterval(timer)
+    }
+  }, [userData])
 
   // Denemeleri çek
   useEffect(() => {
@@ -230,6 +263,23 @@ export default function PanelPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* LGS Countdown Banner */}
+            {userData?.profile?.lgsYear && daysUntilLGS > 0 && (
+              <div className="mb-4 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20">
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <div>
+                    <div className="text-sm text-muted-foreground">
+                      LGS {userData.profile.lgsYear}&apos;ya
+                    </div>
+                    <div className="text-2xl font-bold text-primary">
+                      {daysUntilLGS} gün kaldı
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-lg bg-accent/50">
                 <div className="text-sm text-muted-foreground">Email</div>

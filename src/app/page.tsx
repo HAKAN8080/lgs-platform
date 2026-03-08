@@ -1,5 +1,8 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles } from 'lucide-react'
+import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock } from 'lucide-react'
 
 const tools = [
   {
@@ -49,6 +52,32 @@ const features = [
 ]
 
 export default function Home() {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  useEffect(() => {
+    // LGS 2026: 14 Haziran 2026 Pazar, saat 10:00 (sınav başlangıç saati)
+    const lgsDate = new Date('2026-06-14T10:00:00').getTime()
+
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime()
+      const difference = lgsDate - now
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000),
+        })
+      }
+    }
+
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
   return (
     <div className="relative">
       {/* Hero Section */}
@@ -63,6 +92,32 @@ export default function Home() {
             <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
               Puan hesaplama, net takip, konu analizi ve AI destekli koçluk ile hayalindeki liseye bir adım daha yaklaş.
             </p>
+
+            {/* LGS Countdown */}
+            <div className="mt-8 mb-6">
+              <div className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                <Clock className="h-4 w-4" />
+                <span>LGS 2026&apos;ya Kalan Süre</span>
+              </div>
+              <div className="flex items-center justify-center gap-3 sm:gap-6">
+                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
+                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.days}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Gün</div>
+                </div>
+                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
+                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.hours}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Saat</div>
+                </div>
+                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
+                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.minutes}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Dakika</div>
+                </div>
+                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
+                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.seconds}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Saniye</div>
+                </div>
+              </div>
+            </div>
             <div className="mt-10 flex items-center justify-center gap-x-4">
               <Link
                 href="/araclar/puan-hesaplama"

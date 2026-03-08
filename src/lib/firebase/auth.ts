@@ -25,7 +25,8 @@ function checkFirebaseConfigured() {
 export async function signUpWithEmail(
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
+  studentInfo?: { lgsYear?: string; targetScore?: number }
 ): Promise<UserCredential> {
   checkFirebaseConfigured()
   const userCredential = await createUserWithEmailAndPassword(auth!, email, password)
@@ -34,7 +35,7 @@ export async function signUpWithEmail(
   await updateProfile(userCredential.user, { displayName })
 
   // Firestore'a kullanıcı bilgilerini kaydet
-  await createUserDocument(userCredential.user, { displayName })
+  await createUserDocument(userCredential.user, { displayName, ...studentInfo })
 
   return userCredential
 }
@@ -77,7 +78,7 @@ export async function resetPassword(email: string): Promise<void> {
 // Firestore'a kullanıcı dökümanı oluştur
 async function createUserDocument(
   user: User,
-  additionalData?: { displayName?: string }
+  additionalData?: { displayName?: string; lgsYear?: string; targetScore?: number }
 ): Promise<void> {
   if (!db) return
   const userRef = doc(db, 'users', user.uid)
@@ -92,7 +93,8 @@ async function createUserDocument(
       status: 'active',
     },
     profile: {
-      targetScore: null,
+      lgsYear: additionalData?.lgsYear || null,
+      targetScore: additionalData?.targetScore || null,
       province: null,
       district: null,
     },
