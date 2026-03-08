@@ -67,7 +67,6 @@ const panelFeatures = [
     href: '/panel/net-takip',
     icon: TrendingUp,
     color: 'bg-green-500/10 text-green-500',
-    comingSoon: true,
   },
   {
     name: 'Konu Analizi',
