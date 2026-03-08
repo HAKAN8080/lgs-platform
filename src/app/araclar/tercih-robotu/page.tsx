@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { SCHOOLS_DATA, SCHOOL_TYPES, getSchoolTypeColor } from '@/lib/constants/schools'
 import { Bot, ChevronDown, ChevronUp, MapPin, Users, Star, Target, TrendingUp } from 'lucide-react'
 
+const ILLER = ['Tümü', 'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Kocaeli', 'Konya', 'Adana']
 const DILLER = ['Tümü', 'İngilizce', 'Almanca', 'Fransızca']
 
 function ScoreBadge({ diff }: { diff: number }) {
@@ -16,6 +17,7 @@ function ScoreBadge({ diff }: { diff: number }) {
 
 export default function TercihRobotuPage() {
   const [puan, setPuan] = useState('')
+  const [il, setIl] = useState('Tümü')
   const [tur, setTur] = useState('')
   const [dil, setDil] = useState('Tümü')
   const [searched, setSearched] = useState(false)
@@ -31,6 +33,7 @@ export default function TercihRobotuPage() {
     if (!searched || !puan || isNaN(puanNum)) return { kesin: [], sinirda: [], hedef: [] }
 
     const filtered = SCHOOLS_DATA.filter(s => {
+      if (il !== 'Tümü' && s.il !== il) return false
       if (tur && s.tur !== tur) return false
       if (dil !== 'Tümü' && s.dil !== dil) return false
       const diff = s.puan - puanNum
@@ -143,6 +146,17 @@ export default function TercihRobotuPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
+                <label className="block text-sm font-medium text-foreground mb-2">İl</label>
+                <select
+                  value={il}
+                  onChange={e => setIl(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                >
+                  {ILLER.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+              </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Okul Türü</label>
                 <select
                   value={tur}
@@ -219,7 +233,7 @@ export default function TercihRobotuPage() {
                 />
 
                 <p className="text-xs text-center text-muted-foreground pt-2">
-                  Veriler 2025 LGS ilk yerleştirme sonuçlarına aittir. Sadece İstanbul verileri mevcuttur.
+                  Veriler 2025 LGS ilk yerleştirme sonuçlarına aittir (İstanbul, Ankara, İzmir, Bursa, Antalya, Kocaeli, Konya, Adana).
                 </p>
               </div>
             )}
