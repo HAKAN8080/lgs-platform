@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Calculator, School, Bot } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Ücretsiz LGS Araçları | Puan Hesaplama & Taban Puanları',
+  description: 'LGS puan hesaplama, lise taban puanları sorgulama, tercih robotu ve çalışma programı oluşturucu. Tüm araçlar ücretsiz, kayıt gerektirmez.',
+  alternates: { canonical: '/araclar' },
+}
 
 const tools = [
   {

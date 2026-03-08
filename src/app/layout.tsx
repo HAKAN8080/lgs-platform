@@ -8,9 +8,34 @@ import { Providers } from '@/components/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'LGS Hazırlık Platformu',
-  description: 'LGS sınavına hazırlık için puan hesaplama, net takip, konu analizi ve AI koç',
-  keywords: ['LGS', 'puan hesaplama', 'net hesaplama', 'lise taban puanları', 'sınav hazırlık'],
+  title: {
+    default: 'LGS Hazırlık | Puan Hesaplama, Taban Puanları, Çalışma Programı',
+    template: '%s | LGS Hazırlık',
+  },
+  description: '2026 LGS puan hesaplama, lise taban puanları, tercih robotu ve kişisel çalışma programı. Ücretsiz LGS hazırlık araçları.',
+  keywords: ['LGS', 'LGS puan hesaplama', 'LGS 2026', 'lise taban puanları', 'LGS net hesaplama', 'LGS hazırlık', 'tercih robotu', 'çalışma programı'],
+  authors: [{ name: 'LGS Hazırlık' }],
+  creator: 'LGS Hazırlık',
+  metadataBase: new URL('https://lgs-platformu.vercel.app'),
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'tr_TR',
+    url: 'https://lgs-platformu.vercel.app',
+    siteName: 'LGS Hazırlık',
+    title: 'LGS Hazırlık | Puan Hesaplama, Taban Puanları, Çalışma Programı',
+    description: '2026 LGS puan hesaplama, lise taban puanları, tercih robotu ve kişisel çalışma programı. Ücretsiz LGS hazırlık araçları.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LGS Hazırlık | Puan Hesaplama & Taban Puanları',
+    description: '2026 LGS puan hesaplama, lise taban puanları, ücretsiz hazırlık araçları.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
 }
 
 export default function RootLayout({

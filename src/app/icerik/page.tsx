@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BookOpen, BarChart3, Lightbulb, FileText, Clock, Target, Trophy } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'LGS Hazırlık İçerikleri | Soru Dağılımı, İstatistikler & Stratejiler',
+  description: 'LGS soru dağılımı analizi, 2025 istatistikleri, çalışma programı oluşturucu ve başarı stratejileri. 8 yıllık LGS verisi.',
+  alternates: { canonical: '/icerik' },
+}
 
 const contents = [
   {
