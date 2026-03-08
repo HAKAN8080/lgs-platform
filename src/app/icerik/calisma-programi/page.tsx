@@ -30,6 +30,7 @@ export default function CalismaProgramiPage() {
     }
     const yukle = async () => {
       try {
+        if (!db) { setYukleniyor(false); return; }
         const ref = doc(db, 'users', user.uid, 'calismaProgram', 'program');
         const snap = await getDoc(ref);
         if (snap.exists()) {
@@ -78,6 +79,7 @@ export default function CalismaProgramiPage() {
     setUyari(false);
     setKaydediyor(true);
     try {
+      if (!db) return;
       const ref = doc(db, 'users', user!.uid, 'calismaProgram', 'program');
       await setDoc(ref, {
         musaitlik,

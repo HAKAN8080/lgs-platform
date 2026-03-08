@@ -78,12 +78,11 @@ const panelFeatures = [
     comingSoon: true,
   },
   {
-    name: 'Haftalık Plan',
-    description: 'Kişiselleştirilmiş haftalık çalışma programı',
-    href: '/panel/haftalik-plan',
+    name: 'Haftalık Strateji',
+    description: 'Deneme sonuçlarına göre kişiselleştirilmiş çalışma stratejisi',
+    href: '/panel/strateji',
     icon: Calendar,
     color: 'bg-cyan-500/10 text-cyan-500',
-    comingSoon: true,
   },
   {
     name: 'AI Koç',
@@ -389,7 +388,7 @@ export default function PanelPage() {
           {panelFeatures.map((feature) => (
             <Card
               key={feature.name}
-              className={`relative ${feature.comingSoon ? 'opacity-60' : ''}`}
+              className={`relative ${feature.comingSoon ? 'opacity-60' : 'hover:border-primary/50 transition-colors cursor-pointer'}`}
             >
               {feature.comingSoon && (
                 <span className="absolute top-3 right-3 text-xs font-medium bg-muted text-muted-foreground px-2 py-1 rounded-full">
@@ -410,6 +409,9 @@ export default function PanelPage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>{feature.description}</CardDescription>
+                {!feature.comingSoon && (
+                  <Link href={feature.href} className="absolute inset-0" aria-label={feature.name} />
+                )}
               </CardContent>
             </Card>
           ))}
