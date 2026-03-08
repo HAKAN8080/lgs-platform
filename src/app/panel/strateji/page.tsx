@@ -45,7 +45,24 @@ export default function StratejiPage() {
           .map((d) => d.data())
           .sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime())
           .slice(0, 3);
-        const denemeler = tumDenemeler.map((d) => d.netler as Record<DersKey, number>);
+        // Karne verilerinde key'ler tam isim olabilir, normalize et
+        const KEY_MAP: Record<string, DersKey> = {
+          'Türkçe': 'turkce', 'turkce': 'turkce',
+          'Matematik': 'matematik', 'matematik': 'matematik',
+          'Fen Bilimleri': 'fen', 'Fen': 'fen', 'fen': 'fen',
+          'T.C. İnkılap Tarihi': 'inkilap', 'İnkılap Tarihi': 'inkilap', 'inkilap': 'inkilap',
+          'Din Kültürü': 'din', 'din': 'din',
+          'İngilizce': 'ingilizce', 'ingilizce': 'ingilizce',
+        };
+        const denemeler = tumDenemeler.map((d) => {
+          const raw = d.netler as Record<string, number>;
+          const normalized: Partial<Record<DersKey, number>> = {};
+          for (const [k, v] of Object.entries(raw)) {
+            const mapped = KEY_MAP[k];
+            if (mapped) normalized[mapped] = v;
+          }
+          return normalized as Record<DersKey, number>;
+        });
 
         // Müsaitlik programını çek
         const programRef = doc(db!, 'users', user.uid, 'calismaProgram', 'program');
