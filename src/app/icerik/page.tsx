@@ -19,12 +19,12 @@ const contents = [
     stats: '719 Tam Puan • 66 İl',
   },
   {
-    name: 'Çalışma Stratejileri',
-    description: 'LGS için etkili çalışma yöntemleri, zaman yönetimi ve sınav taktikleri.',
+    name: 'Çalışma Programı Oluşturucu',
+    description: 'Müsaitlik takvimini ve ders netlerini girerek kişiselleştirilmiş haftalık program oluştur.',
     href: '/icerik/calisma-programi',
     icon: Lightbulb,
     color: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    stats: 'Çalışma Programı',
+    stats: '3 Adımda Program',
   },
   {
     name: 'Konu Anlatımları',
