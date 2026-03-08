@@ -5,7 +5,8 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/auth-context';
 import { stratejiHesapla, type StratejSonuc, type DersKey } from '@/lib/calculations/strateji-motoru';
-import { Loader2, AlertTriangle, TrendingDown, TrendingUp, Minus, Info } from 'lucide-react';
+import { Loader2, AlertTriangle, TrendingDown, TrendingUp, Minus, Info, CalendarDays } from 'lucide-react';
+import Link from 'next/link';
 
 const TREND_ICON = {
   'düşüş': <TrendingDown className="w-4 h-4 text-red-500" />,
@@ -126,7 +127,18 @@ export default function StratejiPage() {
       {/* Genel mesaj */}
       <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6">
         <Info className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-        <p className="text-sm text-foreground">{genelMesaj}</p>
+        <div className="flex-1">
+          <p className="text-sm text-foreground">{genelMesaj}</p>
+          {toplamMusaitSaat === 0 && (
+            <Link
+              href="/icerik/calisma-programi"
+              className="inline-flex items-center gap-2 mt-3 text-sm font-medium text-primary hover:underline"
+            >
+              <CalendarDays className="w-4 h-4" />
+              Çalışma programını oluştur →
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Uyarılar */}
