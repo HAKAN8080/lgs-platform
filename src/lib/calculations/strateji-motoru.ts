@@ -91,39 +91,92 @@ export function gunlukProgramOlustur(
 
   if (aktifGunler.length === 0) return {};
 
-  // Pool: round-robin ile her round'da onerilen >= round olan dersleri ekle
-  const sortedDersler = [...dersler]
-    .filter((d) => d.onerilen > 0)
-    .sort((a, b) => b.onerilen - a.onerilen);
+  // Her günün kalan boş slotları (tüketilecek)
+  const bosSaatler: Record<string, number[]> = {};
+  aktifGunler.forEach(({ gun, saatler }) => { bosSaatler[gun] = [...saatler]; });
 
-  const pool: DersKey[] = [];
-  const maxRound = Math.max(...sortedDersler.map((d) => d.onerilen));
-  for (let round = 0; round < maxRound; round++) {
-    for (const d of sortedDersler) {
-      if (d.onerilen > round) pool.push(d.key);
-    }
-  }
-
-  // Slot listesi: gün döngüsü (Pzt_slot0, Sal_slot0, ..., Pzt_slot1, Sal_slot1, ...)
-  const maxSlots = Math.max(...aktifGunler.map((g) => g.saatler.length));
-  const allSlots: { gun: string; saat: number }[] = [];
-  for (let i = 0; i < maxSlots; i++) {
-    for (const { gun, saatler } of aktifGunler) {
-      if (saatler[i] !== undefined) allSlots.push({ gun, saat: saatler[i] });
-    }
-  }
-
-  // Eşleştir
-  const dersMap = Object.fromEntries(dersler.map((d) => [d.key, d]));
   const program: GunlukProgram = {};
   aktifGunler.forEach(({ gun }) => { program[gun] = []; });
 
-  const limit = Math.min(pool.length, allSlots.length);
-  for (let i = 0; i < limit; i++) {
-    const { gun, saat } = allSlots[i];
-    const key = pool[i];
-    const ders = dersMap[key];
-    program[gun].push({ saat, dersKey: key, label: ders.label, icon: ders.icon, color: DERS_RENK[key] });
+  // Günde kaç saat atandı (ders bazlı) — max 2 kontrolü için
+  const gunDersAtama: Record<string, Record<string, number>> = {};
+  aktifGunler.forEach(({ gun }) => { gunDersAtama[gun] = {}; });
+
+  // Ana önce, sonra ara; her grup içinde saat büyükten küçüğe
+  const sortedDersler = [...dersler]
+    .filter((d) => d.onerilen > 0)
+    .sort((a, b) => {
+      if (a.grup !== b.grup) return a.grup === 'ana' ? -1 : 1;
+      return b.onerilen - a.onerilen;
+    });
+
+  // Bitişik slot çifti bul ve ayır
+  const bitisikCiftBul = (slots: number[]): [number, number] | null => {
+    for (let i = 0; i < slots.length - 1; i++) {
+      if (slots[i + 1] === slots[i] + 1) {
+        return [slots.splice(i, 1)[0], slots.splice(i, 1)[0]];
+      }
+    }
+    return null;
+  };
+
+  // Tek slot ayır (ilk boş)
+  const tekSlotAl = (slots: number[]): number | null => {
+    if (slots.length === 0) return null;
+    return slots.splice(0, 1)[0];
+  };
+
+  const slot = (gun: string, saat: number, ders: DersStrateji) => {
+    program[gun].push({ saat, dersKey: ders.key, label: ders.label, icon: ders.icon, color: DERS_RENK[ders.key] });
+    gunDersAtama[gun][ders.key] = (gunDersAtama[gun][ders.key] ?? 0) + 1;
+  };
+
+  for (const ders of sortedDersler) {
+    let kalan = ders.onerilen;
+    const nDays = aktifGunler.length;
+    let dayIdx = 0;
+    let dongu = 0;
+
+    while (kalan > 0 && dongu < nDays * 4) {
+      dongu++;
+      const gun = aktifGunler[dayIdx % nDays].gun;
+      dayIdx++;
+
+      const atananBuGun = gunDersAtama[gun][ders.key] ?? 0;
+      if (atananBuGun >= 2) continue; // bu güne zaten max 2 atandı
+      if (bosSaatler[gun].length === 0) continue;
+
+      const kalanAtanabilir = Math.min(2 - atananBuGun, kalan);
+
+      if (kalanAtanabilir >= 2) {
+        // Bitişik 2 saat dene
+        const cift = bitisikCiftBul(bosSaatler[gun]);
+        if (cift) {
+          slot(gun, cift[0], ders);
+          slot(gun, cift[1], ders);
+          kalan -= 2;
+        } else {
+          // Bitişik bulunamadı, tek ver
+          const tek = tekSlotAl(bosSaatler[gun]);
+          if (tek !== null) { slot(gun, tek, ders); kalan -= 1; }
+        }
+      } else {
+        // 1 saat ver
+        const tek = tekSlotAl(bosSaatler[gun]);
+        if (tek !== null) { slot(gun, tek, ders); kalan -= 1; }
+      }
+    }
+
+    // Eğer hâlâ kalan varsa max 2 sınırı aşarak yerleştir
+    dayIdx = 0; dongu = 0;
+    while (kalan > 0 && dongu < nDays * 4) {
+      dongu++;
+      const gun = aktifGunler[dayIdx % nDays].gun;
+      dayIdx++;
+      if (bosSaatler[gun].length === 0) continue;
+      const tek = tekSlotAl(bosSaatler[gun]);
+      if (tek !== null) { slot(gun, tek, ders); kalan -= 1; }
+    }
   }
 
   // Saate göre sırala
