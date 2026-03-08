@@ -107,9 +107,9 @@ export function stratejiHesapla(
     };
   });
 
-  // 4:1 havuz dağılımı
-  const anaSaatHavuzu = Math.round((toplamMusaitSaat * 4) / 5 * 10) / 10;
-  const araSaatHavuzu = Math.round((toplamMusaitSaat * 1) / 5 * 10) / 10;
+  // 4:1 havuz dağılımı (tam sayıya yuvarla)
+  const anaSaatHavuzu = Math.round((toplamMusaitSaat * 4) / 5);
+  const araSaatHavuzu = Math.round((toplamMusaitSaat * 1) / 5);
 
   // Grup içi dağılım
   const anaGrup = dersler.filter((d) => d.grup === 'ana');
