@@ -21,11 +21,10 @@ const contents = [
   {
     name: 'Çalışma Stratejileri',
     description: 'LGS için etkili çalışma yöntemleri, zaman yönetimi ve sınav taktikleri.',
-    href: '/icerik/stratejiler',
+    href: '/icerik/calisma-programi',
     icon: Lightbulb,
     color: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    stats: 'Yakında',
-    comingSoon: true,
+    stats: 'Çalışma Programı',
   },
   {
     name: 'Konu Anlatımları',
