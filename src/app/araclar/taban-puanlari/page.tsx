@@ -60,7 +60,7 @@ export default function TabanPuanlariPage() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-green-500/10 px-4 py-2 mb-4">
             <SchoolIcon className="h-5 w-5 text-green-500" />
-            <span className="text-sm font-medium text-green-500">2024 Verileri</span>
+            <span className="text-sm font-medium text-green-500">2025 Verileri</span>
           </div>
           <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Lise Taban Puanları</h1>
           <p className="mt-4 text-muted-foreground">
