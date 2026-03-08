@@ -60,11 +60,78 @@ function trendHesapla(netler: number[]): Trend {
   return 'stabil';
 }
 
-function saatiFormatla(saat: number): string {
-  const tam = Math.floor(saat);
-  const dk = Math.round((saat - tam) * 60);
-  if (dk === 0) return `${tam} saat`;
-  return `${tam} saat ${dk} dk`;
+export interface GunlukSlot {
+  saat: number;
+  dersKey: DersKey;
+  label: string;
+  icon: string;
+  color: string;
+}
+
+export type GunlukProgram = Record<string, GunlukSlot[]>;
+
+const DERS_RENK: Record<DersKey, string> = {
+  turkce:    'bg-blue-500/20 text-blue-700 border-blue-500/30',
+  matematik: 'bg-red-500/20 text-red-700 border-red-500/30',
+  fen:       'bg-green-500/20 text-green-700 border-green-500/30',
+  inkilap:   'bg-orange-500/20 text-orange-700 border-orange-500/30',
+  din:       'bg-purple-500/20 text-purple-700 border-purple-500/30',
+  ingilizce: 'bg-cyan-500/20 text-cyan-700 border-cyan-500/30',
+};
+
+const GUNLER_SIRA = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+export function gunlukProgramOlustur(
+  dersler: DersStrateji[],
+  musaitlik: Record<string, number[]>
+): GunlukProgram {
+  const aktifGunler = GUNLER_SIRA
+    .filter((g) => musaitlik[g]?.length > 0)
+    .map((g) => ({ gun: g, saatler: [...musaitlik[g]].sort((a, b) => a - b) }));
+
+  if (aktifGunler.length === 0) return {};
+
+  // Pool: round-robin ile her round'da onerilen >= round olan dersleri ekle
+  const sortedDersler = [...dersler]
+    .filter((d) => d.onerilen > 0)
+    .sort((a, b) => b.onerilen - a.onerilen);
+
+  const pool: DersKey[] = [];
+  const maxRound = Math.max(...sortedDersler.map((d) => d.onerilen));
+  for (let round = 0; round < maxRound; round++) {
+    for (const d of sortedDersler) {
+      if (d.onerilen > round) pool.push(d.key);
+    }
+  }
+
+  // Slot listesi: gün döngüsü (Pzt_slot0, Sal_slot0, ..., Pzt_slot1, Sal_slot1, ...)
+  const maxSlots = Math.max(...aktifGunler.map((g) => g.saatler.length));
+  const allSlots: { gun: string; saat: number }[] = [];
+  for (let i = 0; i < maxSlots; i++) {
+    for (const { gun, saatler } of aktifGunler) {
+      if (saatler[i] !== undefined) allSlots.push({ gun, saat: saatler[i] });
+    }
+  }
+
+  // Eşleştir
+  const dersMap = Object.fromEntries(dersler.map((d) => [d.key, d]));
+  const program: GunlukProgram = {};
+  aktifGunler.forEach(({ gun }) => { program[gun] = []; });
+
+  const limit = Math.min(pool.length, allSlots.length);
+  for (let i = 0; i < limit; i++) {
+    const { gun, saat } = allSlots[i];
+    const key = pool[i];
+    const ders = dersMap[key];
+    program[gun].push({ saat, dersKey: key, label: ders.label, icon: ders.icon, color: DERS_RENK[key] });
+  }
+
+  // Saate göre sırala
+  for (const gun of Object.keys(program)) {
+    program[gun].sort((a, b) => a.saat - b.saat);
+  }
+
+  return program;
 }
 
 export function stratejiHesapla(

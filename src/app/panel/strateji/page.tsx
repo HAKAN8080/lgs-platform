@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/auth-context';
-import { stratejiHesapla, type StratejSonuc, type DersKey } from '@/lib/calculations/strateji-motoru';
+import { stratejiHesapla, gunlukProgramOlustur, type StratejSonuc, type DersKey, type GunlukProgram } from '@/lib/calculations/strateji-motoru';
 import { Loader2, AlertTriangle, TrendingDown, TrendingUp, Minus, Info, CalendarDays, PenLine, Database } from 'lucide-react';
 import Link from 'next/link';
 
@@ -46,6 +46,7 @@ export default function StratejiPage() {
   const [otomatikSonuc, setOtomatikSonuc] = useState<StratejSonuc | null>(null);
   const [manuelSonuc, setManuelSonuc] = useState<StratejSonuc | null>(null);
   const [musaitlik, setMusaitlik] = useState<Record<string, number[]>>({});
+  const [gunlukProgram, setGunlukProgram] = useState<GunlukProgram | null>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState('');
 
@@ -80,7 +81,9 @@ export default function StratejiPage() {
         const programSnap = await getDoc(programRef);
         const musaitlikData = programSnap.exists() ? programSnap.data().musaitlik : {};
         setMusaitlik(musaitlikData);
-        setOtomatikSonuc(stratejiHesapla(denemeler, musaitlikData));
+        const hesaplananSonuc = stratejiHesapla(denemeler, musaitlikData);
+        setOtomatikSonuc(hesaplananSonuc);
+        setGunlukProgram(gunlukProgramOlustur(hesaplananSonuc.dersler, musaitlikData));
       } catch (e) {
         console.error(e);
         setHata('Veriler yüklenirken bir hata oluştu.');
@@ -97,8 +100,9 @@ export default function StratejiPage() {
     for (const d of DERSLER_MANUEL) {
       netler[d.key] = parseFloat(manuelNetler[d.key] || '0') || 0;
     }
-    // Tek "deneme" olarak ver, trend yetersiz_veri çıkar
-    setManuelSonuc(stratejiHesapla([netler], musaitlik));
+    const hesaplananSonuc = stratejiHesapla([netler], musaitlik);
+    setManuelSonuc(hesaplananSonuc);
+    setGunlukProgram(gunlukProgramOlustur(hesaplananSonuc.dersler, musaitlik));
   };
 
   if (authLoading || yukleniyor) {
@@ -258,6 +262,37 @@ export default function StratejiPage() {
               {araGrup.map((d) => <DersKarti key={d.key} ders={d} />)}
             </div>
           </div>
+
+          {/* Günlük Program */}
+          {gunlukProgram && Object.keys(gunlukProgram).length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                Günlük Ders Programı
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(gunlukProgram).map(([gun, slotlar]) => (
+                  <div key={gun} className="bg-card border rounded-xl overflow-hidden">
+                    <div className="px-4 py-2.5 border-b bg-muted/40 flex items-center justify-between">
+                      <span className="font-semibold text-foreground">{gun}</span>
+                      <span className="text-xs text-muted-foreground">{slotlar.length} saat</span>
+                    </div>
+                    <div className="divide-y">
+                      {slotlar.map((slot) => (
+                        <div key={slot.saat} className="flex items-center gap-3 px-4 py-2.5">
+                          <span className="text-xs text-muted-foreground w-12 shrink-0">
+                            {String(slot.saat).padStart(2, '0')}:00
+                          </span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${slot.color}`}>
+                            {slot.icon} {slot.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
