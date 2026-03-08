@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, getDoc, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/auth-context';
 import { stratejiHesapla, type StratejSonuc, type DersKey } from '@/lib/calculations/strateji-motoru';
@@ -35,15 +35,17 @@ export default function StratejiPage() {
 
     const yukle = async () => {
       try {
-        // Son 3 denemeyi çek
+        // Son 3 denemeyi çek (client-side sıralama - index gerektirmez)
         const q = query(
           collection(db!, 'denemeler'),
-          where('userId', '==', user.uid),
-          orderBy('tarih', 'desc'),
-          limit(3)
+          where('userId', '==', user.uid)
         );
         const snap = await getDocs(q);
-        const denemeler = snap.docs.map((d) => d.data().netler as Record<DersKey, number>);
+        const tumDenemeler = snap.docs
+          .map((d) => d.data())
+          .sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime())
+          .slice(0, 3);
+        const denemeler = tumDenemeler.map((d) => d.netler as Record<DersKey, number>);
 
         // Müsaitlik programını çek
         const programRef = doc(db!, 'users', user.uid, 'calismaProgram', 'program');
