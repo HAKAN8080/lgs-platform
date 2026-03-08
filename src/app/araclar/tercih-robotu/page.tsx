@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { SCHOOLS_DATA, SCHOOL_TYPES, getSchoolTypeColor } from '@/lib/constants/schools'
 import { Bot, ChevronDown, ChevronUp, MapPin, Users, Star, Target, TrendingUp } from 'lucide-react'
 
-const ILLER = ['Tümü', 'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Kocaeli', 'Konya', 'Adana']
+const ILLER = ['Tümü', 'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Kocaeli', 'Konya', 'Adana', 'Trabzon', 'Kayseri', 'Mersin', 'Diyarbakır', 'Gaziantep', 'Eskişehir']
 const DILLER = ['Tümü', 'İngilizce', 'Almanca', 'Fransızca']
 
 function ScoreBadge({ diff }: { diff: number }) {

@@ -363,6 +363,128 @@ export const SCHOOLS_DATA: School[] = [
   { il: "Adana", ilce: "Yüreğir", lise: "TOKİ Köprülü Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 379.95, yuzdelik: 0, siralama: 0, kontenjan: 0 },
   { il: "Adana", ilce: "Yüreğir", lise: "Yüreğir Halıcılar Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 387.17, yuzdelik: 0, siralama: 0, kontenjan: 0 },
   { il: "Adana", ilce: "Yüreğir", lise: "75.Yıl Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 397.03, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // TRABZON
+  // =====================
+  { il: "Trabzon", ilce: "Akçaabat", lise: "Akçaabat Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 393.23, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Akçaabat", lise: "Akçaabat Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 454.05, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Araklı", lise: "Araklı Mehmet Akif Ersoy Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 317.15, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Beşikdüzü", lise: "Beşikdüzü Borsa İstanbul Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 404.55, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Of", lise: "Of Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 406.30, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Ortahisar", lise: "Kanuni Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 438.95, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Ortahisar", lise: "Tevfik Serdar Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 417.84, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Ortahisar", lise: "Trabzon Merkez Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 476.79, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Ortahisar", lise: "Trabzon Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 384.00, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Sürmene", lise: "Sürmene Hasan Tahsin Kırali Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 352.42, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Vakfıkebir", lise: "Vakfıkebir Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 397.59, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Trabzon", ilce: "Yomra", lise: "Trabzon Yomra Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 468.17, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // KAYSERİ
+  // =====================
+  { il: "Kayseri", ilce: "Bünyan", lise: "Bünyan Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 401.31, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Develi", lise: "Develi Borsa İstanbul Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 415.91, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "İncesu", lise: "Mustafa Özkan Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 270.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Kocasinan", lise: "Nuh Mehmet Küçükçalık Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 459.07, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Kocasinan", lise: "Osman Ulubaş Kayseri Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 483.28, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Kocasinan", lise: "Sami Yangın Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 450.29, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Kocasinan", lise: "Sümer Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 475.14, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Melikgazi", lise: "Kayseri Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 462.75, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Melikgazi", lise: "Kayseri Kilim Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 404.54, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Melikgazi", lise: "Nuh Mehmet Baldöktü Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 443.07, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Melikgazi", lise: "Osman Ulubaş Köşk Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 436.96, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Melikgazi", lise: "Sema Yazar Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 428.67, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Pınarbaşı", lise: "Pazarören Mimar Sinan Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 322.10, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Talas", lise: "Hidayet Aydoğan Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 393.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Tomarza", lise: "Tomarza Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 372.16, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Yahyalı", lise: "Mustafa Koyuncu Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 380.81, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Kayseri", ilce: "Yeşilhisar", lise: "Şehit Kübra Doğanay Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 394.02, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // MERSİN
+  // =====================
+  { il: "Mersin", ilce: "Akdeniz", lise: "Tevfik Sırrı Gür Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 398.76, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Akdeniz", lise: "75.Yıl Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 434.18, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Anamur", lise: "Anamur Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 367.88, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Anamur", lise: "Şehit İbrahim Armut Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 411.70, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Erdemli", lise: "Erdemli Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 367.92, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Erdemli", lise: "Erdemli Borsa İstanbul Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 407.51, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Mezitli", lise: "İçel Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 446.13, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Mezitli", lise: "Mersin Yusuf Kalkavan Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 422.66, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Mut", lise: "Mut Osman Nuri Yalman Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 340.86, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Mut", lise: "Şehit Ali Gümüş Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 370.48, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Silifke", lise: "Silifke Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 385.49, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Silifke", lise: "Silifke Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 418.65, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Tarsus", lise: "Sesim Sarpkaya Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 455.45, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Tarsus", lise: "Tarsus Borsa İstanbul Şehit Umut Sami Şensoy Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 403.76, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Tarsus", lise: "Tarsus Şehit Halil Özdemir Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 430.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Toroslar", lise: "Mersin Ticaret ve Sanayi Odası Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 414.29, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Yenişehir", lise: "Eyüp Aygar Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 479.15, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Yenişehir", lise: "Mehmet Akif Ersoy Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 375.13, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Mersin", ilce: "Yenişehir", lise: "Yahya Akel Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 468.84, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // DİYARBAKIR
+  // =====================
+  { il: "Diyarbakır", ilce: "Bağlar", lise: "Borsa İstanbul Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 462.23, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Bağlar", lise: "Güler Şevki Özbek Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 386.73, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Bağlar", lise: "Yeniköy Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 377.67, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Bismil", lise: "Bismil Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 314.88, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Bismil", lise: "Bismil Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 356.67, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Çermik", lise: "Çermik Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 343.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Ergani", lise: "Ergani Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 396.63, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Ergani", lise: "Sermet Yalçın Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 351.13, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Kayapınar", lise: "Adnan Menderes Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 395.43, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Kayapınar", lise: "Fatih Sultan Mehmet Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 390.90, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Kayapınar", lise: "Kayapınar Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 433.73, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Silvan", lise: "Silvan Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 248.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Silvan", lise: "1. Kılıçarslan Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 339.33, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Sur", lise: "Vali Aydın Arslan Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 448.49, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Diyarbakır Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 424.78, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Diyarbakır Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 341.62, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Nevzat Ayaz Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 412.54, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Rekabet Kurumu Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 438.92, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Rekabet Kurumu Cumhuriyet Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 474.78, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Selahaddini Eyyubi Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 398.01, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Diyarbakır", ilce: "Yenişehir", lise: "Sezai Karakoç Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 408.94, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // GAZİANTEP
+  // =====================
+  { il: "Gaziantep", ilce: "İslahiye", lise: "Borsa İstanbul İslahiye Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 379.39, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "İslahiye", lise: "İslahiye Opet Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 298.01, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Nizip", lise: "Hasan Çapan Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 362.97, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Nizip", lise: "Nizip Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 425.31, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Nizip", lise: "Nizip Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 328.07, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "Borsa İstanbul Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 408.41, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "Gaziantep Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 387.03, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "Gülşen Batar Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 396.57, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "Mustafa Gürbüz Necat Bayel Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 423.15, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "Şahinbey Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 351.08, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şahinbey", lise: "TOBB Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 467.56, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Abdulkadir Konukoğlu Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 458.23, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Ayten Kemal Akınal Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 435.32, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Gaziantep Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 437.82, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Gaziantep Sabahattin Zaim Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 364.40, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Hatice-Lütfü Akcan Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 423.79, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Vedat Topçuoğlu Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 405.77, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Vehbi Dinçerler Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 477.08, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Gaziantep", ilce: "Şehitkamil", lise: "Yasemin Erman Balsu Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 452.63, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+
+  // =====================
+  // ESKİŞEHİR (2024 verisi)
+  // =====================
+  { il: "Eskişehir", ilce: "Beylikova", lise: "Beylikova Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 361.47, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Odunpazarı", lise: "Atatürk Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 440.57, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Odunpazarı", lise: "Eskişehir Eti Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 419.75, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Odunpazarı", lise: "Eskişehir Fatih Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 477.25, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Odunpazarı", lise: "Hacı Süleyman Çakır Kız Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 386.50, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Sivrihisar", lise: "Sivrihisar Fahri Keskin Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 388.81, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Tepebaşı", lise: "Borsa İstanbul Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 456.08, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Tepebaşı", lise: "Cemal Mümtaz Sosyal Bilimler Lisesi", tur: "Sosyal Bilimler", dil: "İngilizce", puan: 385.07, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Tepebaşı", lise: "Eskişehir Anadolu Lisesi", tur: "Anadolu Lisesi", dil: "İngilizce", puan: 465.74, yuzdelik: 0, siralama: 0, kontenjan: 0 },
+  { il: "Eskişehir", ilce: "Tepebaşı", lise: "Şehit Mehmet Şengül Fen Lisesi", tur: "Fen Lisesi", dil: "İngilizce", puan: 450.35, yuzdelik: 0, siralama: 0, kontenjan: 0 },
 ];
 
 export function getSchoolTypeColor(type: string): string {
