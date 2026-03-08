@@ -118,7 +118,7 @@ export function stratejiHesapla(
   const dagilimHesapla = (grup: DersStrateji[], havuz: number) => {
     const toplamPuan = grup.reduce((t, d) => t + d.oncelikPuani, 0);
     grup.forEach((d) => {
-      d.onerilen = Math.round((havuz * d.oncelikPuani) / toplamPuan * 2) / 2; // 0.5 saat hassasiyeti
+      d.onerilen = Math.round((havuz * d.oncelikPuani) / toplamPuan);
     });
   };
 
