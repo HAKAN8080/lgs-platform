@@ -72,12 +72,16 @@ export default function DenemeEklePage() {
   const { isPremium } = usePremium()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [tip, setTip] = useState<'deneme' | 'izleme'>('deneme')
   const [yayinAdi, setYayinAdi] = useState('')
   const [denemeAdi, setDenemeAdi] = useState('')
   const [tarih, setTarih] = useState(new Date().toISOString().split('T')[0])
   const [dersler, setDersler] = useState<Record<string, DersInput>>(
     Object.fromEntries(DERSLER.map(d => [d.key, { dogru: 0, yanlis: 0 }]))
   )
+  // İzleme için
+  const [izlemeDers, setIzlemeDers] = useState<string>('turkce')
+  const [izlemeSoruSayisi, setIzlemeSoruSayisi] = useState<number>(20)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -147,10 +151,16 @@ export default function DenemeEklePage() {
 
   // Net ve Puan Hesaplama
   const hesapla = () => {
+    if (tip === 'izleme') {
+      const { dogru, yanlis } = dersler[izlemeDers] ?? { dogru: 0, yanlis: 0 }
+      const net = Math.max(0, dogru - yanlis / 3)
+      const basariYuzde = izlemeSoruSayisi > 0 ? (net / izlemeSoruSayisi) * 100 : 0
+      const netler: Record<string, number> = { [izlemeDers]: net }
+      return { netler, toplamNet: net, puan: 0, basariYuzde }
+    }
     let toplamNet = 0
     let puanKatkisi = 0
     const netler: Record<string, number> = {}
-
     for (const ders of DERSLER) {
       const { dogru, yanlis } = dersler[ders.key]
       const net = Math.max(0, dogru - yanlis / 3)
@@ -158,13 +168,11 @@ export default function DenemeEklePage() {
       toplamNet += net
       puanKatkisi += net * KATSAYILAR[ders.key as keyof typeof KATSAYILAR]
     }
-
     const puan = Math.min(500, Math.max(200, puanKatkisi + SABIT))
-
-    return { netler, toplamNet, puan }
+    return { netler, toplamNet, puan, basariYuzde: 0 }
   }
 
-  const { netler, toplamNet, puan } = hesapla()
+  const { netler, toplamNet, puan, basariYuzde } = hesapla()
 
   const handleSave = async () => {
     if (!user || !db) {
@@ -202,8 +210,9 @@ export default function DenemeEklePage() {
         return
       }
 
-      const denemeData = {
+      const denemeData: Record<string, unknown> = {
         userId: user.uid,
+        tip: tip,
         yayinAdi: yayinAdi.trim(),
         denemeAdi: denemeAdi.trim(),
         tarih: tarih,
@@ -212,6 +221,9 @@ export default function DenemeEklePage() {
         toplamNet: toplamNet,
         puan: puan,
         createdAt: serverTimestamp(),
+      }
+      if (tip === 'izleme') {
+        denemeData.soruSayisi = { [izlemeDers]: izlemeSoruSayisi }
       }
 
       console.log('Deneme kaydediliyor:', denemeData)
@@ -533,10 +545,30 @@ export default function DenemeEklePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Form */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Tip Seçici */}
+            <div className="flex gap-2 p-1 bg-muted rounded-xl w-fit">
+              {(['deneme', 'izleme'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTip(t)}
+                  className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    tip === t ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t === 'deneme' ? '📋 Deneme' : '🎯 İzleme'}
+                </button>
+              ))}
+            </div>
+            {tip === 'izleme' && (
+              <div className="text-xs text-muted-foreground bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                İzleme sınavları tek/çift dersli olup LGS puanı hesaplanmaz. Başarı % gösterilir.
+              </div>
+            )}
+
             {/* Deneme Bilgileri */}
             <Card>
               <CardHeader>
-                <CardTitle>Deneme Bilgileri</CardTitle>
+                <CardTitle>{tip === 'izleme' ? 'İzleme Bilgileri' : 'Deneme Bilgileri'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -572,67 +604,124 @@ export default function DenemeEklePage() {
             <Card>
               <CardHeader>
                 <CardTitle>Doğru / Yanlış</CardTitle>
-                <CardDescription>Her ders için doğru ve yanlış sayısını girin</CardDescription>
+                <CardDescription>
+                  {tip === 'izleme'
+                    ? 'Hangi ders, kaç soru — doğru/yanlış girin'
+                    : 'Her ders için doğru ve yanlış sayısını girin'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Table Header */}
-                <div className="grid grid-cols-5 gap-2 mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  <div className="col-span-2">Ders</div>
-                  <div className="text-center">Doğru</div>
-                  <div className="text-center">Yanlış</div>
-                  <div className="text-center">Net</div>
-                </div>
-
-                {/* Ders Rows */}
-                <div className="space-y-3">
-                  {DERSLER.map((ders) => {
-                    const net = netler[ders.key] || 0
-                    return (
-                      <div key={ders.key} className="grid grid-cols-5 gap-2 items-center">
-                        <div className="col-span-2 flex items-center gap-2">
-                          <span className="text-lg">{ders.icon}</span>
-                          <div>
-                            <span className="font-medium text-foreground text-sm">{ders.label}</span>
-                            <span className="text-xs text-muted-foreground ml-1">({ders.max})</span>
+                {tip === 'izleme' ? (
+                  /* ── İZLEME MODU ── */
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Ders</label>
+                        <select
+                          value={izlemeDers}
+                          onChange={e => setIzlemeDers(e.target.value)}
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                        >
+                          {DERSLER.map(d => (
+                            <option key={d.key} value={d.key}>{d.icon} {d.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Toplam Soru Sayısı</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={izlemeSoruSayisi}
+                          onChange={e => setIzlemeSoruSayisi(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="text-center"
+                        />
+                      </div>
+                    </div>
+                    {(() => {
+                      const ders = DERSLER.find(d => d.key === izlemeDers)!
+                      const net = netler[izlemeDers] || 0
+                      return (
+                        <div className="grid grid-cols-5 gap-2 items-center p-3 bg-muted/40 rounded-xl">
+                          <div className="col-span-2 flex items-center gap-2">
+                            <span className="text-xl">{ders.icon}</span>
+                            <span className="font-semibold text-foreground">{ders.label}</span>
+                          </div>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={izlemeSoruSayisi}
+                            value={dersler[izlemeDers].dogru || ''}
+                            onChange={e => handleDersChange(izlemeDers, 'dogru', e.target.value)}
+                            className="text-center h-10 bg-green-500/5 border-green-500/30"
+                            placeholder="Doğru"
+                          />
+                          <Input
+                            type="number"
+                            min={0}
+                            max={izlemeSoruSayisi - dersler[izlemeDers].dogru}
+                            value={dersler[izlemeDers].yanlis || ''}
+                            onChange={e => handleDersChange(izlemeDers, 'yanlis', e.target.value)}
+                            className="text-center h-10 bg-red-500/5 border-red-500/30"
+                            placeholder="Yanlış"
+                          />
+                          <div className="text-center">
+                            <span className="text-sm font-bold" style={{ color: ders.color }}>
+                              {net.toFixed(2)}
+                            </span>
                           </div>
                         </div>
-                        <div>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={ders.max}
-                            value={dersler[ders.key].dogru || ''}
-                            onChange={(e) => handleDersChange(ders.key, 'dogru', e.target.value)}
-                            className="text-center h-10 bg-green-500/5 border-green-500/30 focus:border-green-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={ders.max - dersler[ders.key].dogru}
-                            value={dersler[ders.key].yanlis || ''}
-                            onChange={(e) => handleDersChange(ders.key, 'yanlis', e.target.value)}
-                            className="text-center h-10 bg-red-500/5 border-red-500/30 focus:border-red-500"
-                            placeholder="0"
-                          />
-                        </div>
-                        <div className="text-center">
-                          <span
-                            className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 rounded-md text-sm font-bold"
-                            style={{
-                              backgroundColor: `${ders.color}15`,
-                              color: ders.color
-                            }}
-                          >
-                            {net.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                      )
+                    })()}
+                  </div>
+                ) : (
+                  /* ── DENEME MODU ── */
+                  <>
+                    <div className="grid grid-cols-5 gap-2 mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      <div className="col-span-2">Ders</div>
+                      <div className="text-center">Doğru</div>
+                      <div className="text-center">Yanlış</div>
+                      <div className="text-center">Net</div>
+                    </div>
+                    <div className="space-y-3">
+                      {DERSLER.map((ders) => {
+                        const net = netler[ders.key] || 0
+                        return (
+                          <div key={ders.key} className="grid grid-cols-5 gap-2 items-center">
+                            <div className="col-span-2 flex items-center gap-2">
+                              <span className="text-lg">{ders.icon}</span>
+                              <div>
+                                <span className="font-medium text-foreground text-sm">{ders.label}</span>
+                                <span className="text-xs text-muted-foreground ml-1">({ders.max})</span>
+                              </div>
+                            </div>
+                            <Input
+                              type="number" min={0} max={ders.max}
+                              value={dersler[ders.key].dogru || ''}
+                              onChange={e => handleDersChange(ders.key, 'dogru', e.target.value)}
+                              className="text-center h-10 bg-green-500/5 border-green-500/30 focus:border-green-500"
+                              placeholder="0"
+                            />
+                            <Input
+                              type="number" min={0} max={ders.max - dersler[ders.key].dogru}
+                              value={dersler[ders.key].yanlis || ''}
+                              onChange={e => handleDersChange(ders.key, 'yanlis', e.target.value)}
+                              className="text-center h-10 bg-red-500/5 border-red-500/30 focus:border-red-500"
+                              placeholder="0"
+                            />
+                            <div className="text-center">
+                              <span className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 rounded-md text-sm font-bold"
+                                style={{ backgroundColor: `${ders.color}15`, color: ders.color }}>
+                                {net.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -664,15 +753,31 @@ export default function DenemeEklePage() {
                 <CardTitle className="text-lg">Hesaplanan Sonuç</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center p-4 rounded-lg bg-background/60">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">Toplam Net</div>
-                  <div className="text-3xl font-black text-primary">{toplamNet.toFixed(2)}</div>
-                  <div className="text-xs text-muted-foreground">/ 90</div>
-                </div>
-                <div className="text-center p-4 rounded-lg bg-background/60">
-                  <div className="text-xs text-muted-foreground uppercase mb-1">LGS Puan</div>
-                  <div className="text-4xl font-black text-green-500">{puan.toFixed(2)}</div>
-                </div>
+                {tip === 'izleme' ? (
+                  <>
+                    <div className="text-center p-4 rounded-lg bg-background/60">
+                      <div className="text-xs text-muted-foreground uppercase mb-1">Net</div>
+                      <div className="text-3xl font-black text-primary">{toplamNet.toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">/ {izlemeSoruSayisi} soru</div>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-background/60">
+                      <div className="text-xs text-muted-foreground uppercase mb-1">Başarı %</div>
+                      <div className="text-4xl font-black text-emerald-500">%{basariYuzde.toFixed(1)}</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center p-4 rounded-lg bg-background/60">
+                      <div className="text-xs text-muted-foreground uppercase mb-1">Toplam Net</div>
+                      <div className="text-3xl font-black text-primary">{toplamNet.toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">/ 90</div>
+                    </div>
+                    <div className="text-center p-4 rounded-lg bg-background/60">
+                      <div className="text-xs text-muted-foreground uppercase mb-1">LGS Puan</div>
+                      <div className="text-4xl font-black text-green-500">{puan.toFixed(2)}</div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

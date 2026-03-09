@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth, usePremium } from '@/contexts/auth-context'
 import { signOut } from '@/lib/firebase/auth'
 import { db } from '@/lib/firebase/config'
-import { collection, query, where, orderBy, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, where, orderBy, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import {
   User,
   LogOut,
@@ -23,7 +23,10 @@ import {
   Loader2,
   Plus,
   Trash2,
-  Clock
+  Clock,
+  Pencil,
+  X,
+  Save,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -35,6 +38,7 @@ interface Deneme {
   toplamNet: number
   puan: number
   netler: Record<string, number>
+  tip?: 'deneme' | 'izleme'
 }
 
 const quickTools = [
@@ -101,6 +105,12 @@ export default function PanelPage() {
   const [denemeler, setDenemeler] = useState<Deneme[]>([])
   const [loadingDenemeler, setLoadingDenemeler] = useState(true)
   const [daysUntilLGS, setDaysUntilLGS] = useState(0)
+  // Edit modal state
+  const [editingDeneme, setEditingDeneme] = useState<Deneme | null>(null)
+  const [editYayinAdi, setEditYayinAdi] = useState('')
+  const [editDenemeAdi, setEditDenemeAdi] = useState('')
+  const [editTarih, setEditTarih] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -186,6 +196,35 @@ export default function PanelPage() {
       setDenemeler(prev => prev.filter(d => d.id !== id))
     } catch (err) {
       console.error('Silme hatası:', err)
+    }
+  }
+
+  const openEdit = (d: Deneme) => {
+    setEditingDeneme(d)
+    setEditYayinAdi(d.yayinAdi)
+    setEditDenemeAdi(d.denemeAdi)
+    setEditTarih(d.tarih)
+  }
+
+  const handleEditSave = async () => {
+    if (!editingDeneme || !db) return
+    setEditSaving(true)
+    try {
+      await updateDoc(doc(db, 'denemeler', editingDeneme.id), {
+        yayinAdi: editYayinAdi.trim(),
+        denemeAdi: editDenemeAdi.trim(),
+        tarih: editTarih,
+      })
+      setDenemeler(prev => prev.map(d =>
+        d.id === editingDeneme.id
+          ? { ...d, yayinAdi: editYayinAdi.trim(), denemeAdi: editDenemeAdi.trim(), tarih: editTarih }
+          : d
+      ))
+      setEditingDeneme(null)
+    } catch (err) {
+      console.error('Güncelleme hatası:', err)
+    } finally {
+      setEditSaving(false)
     }
   }
 
@@ -342,30 +381,33 @@ export default function PanelPage() {
                     className="flex items-center justify-between p-4 rounded-lg border border-border bg-accent/30 hover:bg-accent/50 transition-colors"
                   >
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-foreground">{deneme.yayinAdi}</span>
                         <span className="text-muted-foreground">-</span>
                         <span className="text-foreground">{deneme.denemeAdi}</span>
+                        {deneme.tip === 'izleme' && (
+                          <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded">İzleme</span>
+                        )}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
                         {new Date(deneme.tarih).toLocaleDateString('tr-TR')}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Net</div>
-                        <div className="font-bold text-primary">{deneme.toplamNet.toFixed(2)}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">Puan</div>
-                        <div className="font-bold text-green-500">{deneme.puan.toFixed(2)}</div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteDeneme(deneme.id)}
-                        className="text-muted-foreground hover:text-red-500"
-                      >
+                    <div className="flex items-center gap-3">
+                      {deneme.tip !== 'izleme' && (
+                        <div className="text-right hidden sm:block">
+                          <div className="text-xs text-muted-foreground">Net / Puan</div>
+                          <div className="font-bold text-primary text-sm">
+                            {deneme.toplamNet.toFixed(1)} / <span className="text-green-500">{deneme.puan.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      )}
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(deneme)}
+                        className="text-muted-foreground hover:text-primary">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteDeneme(deneme.id)}
+                        className="text-muted-foreground hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -444,5 +486,57 @@ export default function PanelPage() {
         )}
       </div>
     </div>
+
+    {/* Düzenle Modal */}
+    {editingDeneme && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h3 className="font-semibold text-foreground">Düzenle</h3>
+            <button onClick={() => setEditingDeneme(null)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Yayın Adı</label>
+              <input
+                value={editYayinAdi}
+                onChange={e => setEditYayinAdi(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Deneme Adı</label>
+              <input
+                value={editDenemeAdi}
+                onChange={e => setEditDenemeAdi(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Tarih</label>
+              <input
+                type="date"
+                value={editTarih}
+                onChange={e => setEditTarih(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 px-5 pb-5">
+            <button onClick={() => setEditingDeneme(null)}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors">
+              İptal
+            </button>
+            <button onClick={handleEditSave} disabled={editSaving}
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+              {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Kaydet
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }
