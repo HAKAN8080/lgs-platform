@@ -491,6 +491,7 @@ export default function NetTakipPage() {
   const [selected, setSelected] = useState<string>('toplam')
   const [displayMode, setDisplayMode] = useState<'net' | 'puan' | 'yuzde'>('net')
   const [tableFilter, setTableFilter] = useState<'tumu' | 'denemeler' | 'izlemeler'>('denemeler')
+  const [yayinFilter, setYayinFilter] = useState<string>('tumu')
 
   useEffect(() => {
     if (!loading && !user) router.push('/giris')
@@ -525,11 +526,11 @@ export default function NetTakipPage() {
   if (!isPremium) return <NetTakipTeaser />
 
   // ─── Global filter (affects both chart and table) ─────────────────────────
-  const baseFiltered = tableFilter === 'tumu'
-    ? denemeler
-    : tableFilter === 'izlemeler'
-      ? denemeler.filter(d => d.tip === 'izleme')
-      : denemeler.filter(d => d.tip !== 'izleme')
+  const yayinlar = Array.from(new Set(denemeler.map(d => d.yayinAdi))).sort()
+
+  const baseFiltered = denemeler
+    .filter(d => tableFilter === 'tumu' ? true : tableFilter === 'izlemeler' ? d.tip === 'izleme' : d.tip !== 'izleme')
+    .filter(d => yayinFilter === 'tumu' ? true : d.yayinAdi === yayinFilter)
 
   // For the summary table
   const denemeleriForTable = baseFiltered
@@ -658,7 +659,7 @@ export default function NetTakipPage() {
         ) : (
           <>
             {/* Global filter + Display mode toggle */}
-            <div className="flex items-center gap-2 mb-4 justify-between flex-wrap">
+            <div className="flex items-center gap-2 mb-3 justify-between flex-wrap">
               {/* Deneme / İzleme / Tümü global filtresi */}
               <div className="flex gap-1 p-1 bg-muted rounded-lg">
                 {(['denemeler', 'izlemeler', 'tumu'] as const).map(f => (
@@ -696,6 +697,35 @@ export default function NetTakipPage() {
                 </div>
               )}
             </div>
+
+            {/* Yayın Filtresi */}
+            {yayinlar.length > 1 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                <button
+                  onClick={() => setYayinFilter('tumu')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                    yayinFilter === 'tumu'
+                      ? 'bg-foreground text-background border-foreground'
+                      : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Tüm Yayınlar
+                </button>
+                {yayinlar.map(y => (
+                  <button
+                    key={y}
+                    onClick={() => setYayinFilter(y)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                      yayinFilter === y
+                        ? 'bg-foreground text-background border-foreground'
+                        : 'bg-card border-border text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {y}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Ders Seçici */}
             <div className="flex flex-wrap gap-2 mb-6">
