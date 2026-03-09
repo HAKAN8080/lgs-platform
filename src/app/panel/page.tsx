@@ -246,6 +246,7 @@ export default function PanelPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen py-8 sm:py-12">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         {/* Welcome Header */}
@@ -538,5 +539,6 @@ export default function PanelPage() {
         </div>
       </div>
     )}
+    </>
   )
 }
