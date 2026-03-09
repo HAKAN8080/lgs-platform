@@ -678,6 +678,59 @@ export default function KarneEklePage() {
     )
   }
 
+  const FREE_LIMIT = 3
+
+  // Ücretsiz kullanıcı limiti
+  if (!isPremium && denemeCount >= FREE_LIMIT) {
+    return (
+      <div className="min-h-screen py-8 sm:py-12">
+        <div className="mx-auto max-w-lg px-4">
+          <Link href="/panel" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8">
+            <ArrowLeft className="h-4 w-4" /> Panele Dön
+          </Link>
+          <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+              <FileText className="h-8 w-8 text-primary" />
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1 mb-4">
+              <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs font-medium text-amber-500">Ücretsiz Limit Doldu</span>
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-2">
+              {FREE_LIMIT} karne limitine ulaştın
+            </h2>
+            <p className="text-muted-foreground text-sm mb-6">
+              Ücretsiz hesaplarda en fazla <span className="font-semibold text-foreground">{FREE_LIMIT} karne</span> yüklenebilir.
+              Premium&apos;a geçerek sınırsız karne yükle.
+            </p>
+            <div className="grid grid-cols-1 gap-2 text-sm text-left mb-6">
+              {[
+                'Sınırsız karne yükleme',
+                'Konu bazlı detaylı analiz',
+                'Net takip ve grafik',
+                'AI destekli çalışma programı',
+              ].map(f => (
+                <div key={f} className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                  {f}
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 border border-primary/20 p-5">
+              <div className="text-2xl font-bold text-foreground mb-1">99₺ <span className="text-sm font-normal text-muted-foreground">/ ay</span></div>
+              <Link
+                href="/premium"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors w-full justify-center"
+              >
+                Premium&apos;a Geç
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen py-8 sm:py-12">
       <div className="mx-auto max-w-4xl px-4 lg:px-8">
@@ -690,7 +743,14 @@ export default function KarneEklePage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Karne Yükle</h1>
-            <p className="text-muted-foreground">PDF karne yükleyerek konu analizi yap</p>
+            <p className="text-muted-foreground">
+              PDF karne yükleyerek konu analizi yap
+              {!isPremium && (
+                <span className="ml-2 text-xs text-amber-500 font-medium">
+                  ({denemeCount}/{FREE_LIMIT} kullanıldı — <Link href="/premium" className="underline hover:text-amber-400">Premium ile sınırsız</Link>)
+                </span>
+              )}
+            </p>
           </div>
         </div>
 

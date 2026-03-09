@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/auth-context'
+import { useAuth, usePremium } from '@/contexts/auth-context'
 import { db } from '@/lib/firebase/config'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import {
@@ -16,7 +16,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Minus, Loader2, ArrowLeft, BarChart3 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Loader2, ArrowLeft, BarChart3, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 interface Deneme {
@@ -74,9 +74,416 @@ function trend(values: number[]): 'up' | 'down' | 'stable' {
   return 'stable'
 }
 
+// ─── Demo data ───────────────────────────────────────────────────────────────
+const DEMO_CHART = [
+  { tarih: '10 Oca', toplam: 38.4, turkce: 12.1, matematik: 8.2, fen: 10.3, inkilap: 4.1, din: 3.8, ingilizce: 4.2 },
+  { tarih: '25 Oca', toplam: 41.2, turkce: 13.5, matematik: 9.1, fen: 11.2, inkilap: 4.5, din: 4.1, ingilizce: 4.8 },
+  { tarih: '08 Şub', toplam: 44.7, turkce: 14.2, matematik: 10.3, fen: 12.1, inkilap: 4.8, din: 4.3, ingilizce: 5.1 },
+  { tarih: '22 Şub', toplam: 47.1, turkce: 15.1, matematik: 11.8, fen: 12.8, inkilap: 5.0, din: 4.6, ingilizce: 5.4 },
+  { tarih: '10 Mar', toplam: 49.3, turkce: 15.8, matematik: 12.4, fen: 13.2, inkilap: 5.1, din: 4.8, ingilizce: 5.7 },
+  { tarih: '24 Mar', toplam: 52.1, turkce: 16.3, matematik: 13.9, fen: 14.1, inkilap: 5.3, din: 5.0, ingilizce: 6.2 },
+]
+
+// ─── Slide 1: Stats + Ders Seçici ────────────────────────────────────────────
+function Slide1() {
+  const dersButtons = [
+    { key: 'toplam', label: 'Toplam Net' },
+    { key: 'turkce', label: 'Türkçe' },
+    { key: 'matematik', label: 'Matematik' },
+    { key: 'fen', label: 'Fen' },
+    { key: 'inkilap', label: 'İnkılap' },
+    { key: 'din', label: 'Din' },
+    { key: 'ingilizce', label: 'İngilizce' },
+  ]
+
+  return (
+    <div className="p-5 pointer-events-none select-none space-y-5">
+      {/* Ders selector */}
+      <div className="flex flex-wrap gap-2">
+        {dersButtons.map((d) => (
+          <div
+            key={d.key}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
+              d.key === 'toplam'
+                ? 'bg-indigo-500 text-white border-indigo-500'
+                : 'bg-card border-border text-muted-foreground'
+            }`}
+          >
+            {d.label}
+          </div>
+        ))}
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-4 gap-3">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground mb-1">Ortalama</div>
+          <div className="text-2xl font-bold text-foreground">45.5</div>
+          <div className="text-xs text-muted-foreground">/ 80</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground mb-1">En Yüksek</div>
+          <div className="text-2xl font-bold text-green-500">52.1</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground mb-1">En Düşük</div>
+          <div className="text-2xl font-bold text-red-500">38.4</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground mb-1">Trend</div>
+          <div className="flex items-center gap-1 text-xl font-bold text-green-500">
+            <TrendingUp className="h-5 w-5" />
+            Artış
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Slide 2: SVG Line Chart ─────────────────────────────────────────────────
+function Slide2() {
+  const [dashOffset, setDashOffset] = useState(500)
+
+  useEffect(() => {
+    const t = setTimeout(() => setDashOffset(0), 100)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Chart dimensions
+  const W = 560
+  const H = 160
+  const padL = 36
+  const padR = 16
+  const padT = 12
+  const padB = 28
+
+  const chartW = W - padL - padR
+  const chartH = H - padT - padB
+
+  const minY = 0
+  const maxY = 80
+
+  const xs = DEMO_CHART.map((_, i) => padL + (i / (DEMO_CHART.length - 1)) * chartW)
+  const ys = DEMO_CHART.map((d) => padT + chartH - ((d.toplam - minY) / (maxY - minY)) * chartH)
+
+  const polyPoints = xs.map((x, i) => `${x},${ys[i]}`).join(' ')
+
+  const avgY = padT + chartH - ((45.5 - minY) / (maxY - minY)) * chartH
+
+  // Area fill path
+  const areaPath =
+    `M ${xs[0]},${ys[0]} ` +
+    xs.slice(1).map((x, i) => `L ${x},${ys[i + 1]}`).join(' ') +
+    ` L ${xs[xs.length - 1]},${padT + chartH} L ${xs[0]},${padT + chartH} Z`
+
+  const yTicks = [0, 20, 40, 60, 80]
+
+  return (
+    <div className="p-5 pointer-events-none select-none">
+      <div className="rounded-xl border border-border bg-card p-4">
+        <h2 className="text-sm font-medium text-muted-foreground mb-3">
+          Toplam Net — Deneme Bazlı Gelişim
+        </h2>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          width="100%"
+          height={H}
+          className="overflow-visible"
+        >
+          {/* Grid lines */}
+          {yTicks.map((tick) => {
+            const ty = padT + chartH - ((tick - minY) / (maxY - minY)) * chartH
+            return (
+              <line
+                key={tick}
+                x1={padL}
+                y1={ty}
+                x2={W - padR}
+                y2={ty}
+                stroke="rgba(255,255,255,0.05)"
+                strokeDasharray="4 4"
+              />
+            )
+          })}
+
+          {/* Y axis labels */}
+          {yTicks.map((tick) => {
+            const ty = padT + chartH - ((tick - minY) / (maxY - minY)) * chartH
+            return (
+              <text
+                key={tick}
+                x={padL - 4}
+                y={ty + 4}
+                textAnchor="end"
+                fontSize={9}
+                fill="rgba(255,255,255,0.35)"
+              >
+                {tick}
+              </text>
+            )
+          })}
+
+          {/* X axis labels */}
+          {DEMO_CHART.map((d, i) => (
+            <text
+              key={d.tarih}
+              x={xs[i]}
+              y={H - 4}
+              textAnchor="middle"
+              fontSize={9}
+              fill="rgba(255,255,255,0.35)"
+            >
+              {d.tarih}
+            </text>
+          ))}
+
+          {/* Area fill */}
+          <path d={areaPath} fill="#6366f1" fillOpacity={0.08} />
+
+          {/* Average reference line */}
+          <line
+            x1={padL}
+            y1={avgY}
+            x2={W - padR}
+            y2={avgY}
+            stroke="#6366f1"
+            strokeDasharray="4 4"
+            strokeOpacity={0.4}
+          />
+          <text
+            x={W - padR - 2}
+            y={avgY - 4}
+            textAnchor="end"
+            fontSize={9}
+            fill="#6366f1"
+            fillOpacity={0.7}
+          >
+            Ort: 45.5
+          </text>
+
+          {/* Line */}
+          <polyline
+            points={polyPoints}
+            fill="none"
+            stroke="#6366f1"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="500"
+            strokeDashoffset={dashOffset}
+            style={{ transition: 'stroke-dashoffset 2s ease-in-out' }}
+          />
+
+          {/* Dots */}
+          {xs.map((x, i) => (
+            <circle
+              key={i}
+              cx={x}
+              cy={ys[i]}
+              r={4}
+              fill="#6366f1"
+              stroke="none"
+            />
+          ))}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ─── Slide 3: Tüm Dersler Özet Tablosu ───────────────────────────────────────
+function Slide3() {
+  const rows = [
+    { label: 'Toplam Net', color: '#6366f1', avg: 45.5, max: 52.1, son: 52.1, trend: 'up' },
+    { label: 'Türkçe',     color: '#3b82f6', avg: 14.5, max: 16.3, son: 16.3, trend: 'up' },
+    { label: 'Matematik',  color: '#ef4444', avg: 10.9, max: 13.9, son: 13.9, trend: 'up' },
+    { label: 'Fen',        color: '#22c55e', avg: 12.3, max: 14.1, son: 14.1, trend: 'up' },
+    { label: 'İnkılap',    color: '#f97316', avg: 4.8,  max: 5.3,  son: 5.3,  trend: 'stable' },
+    { label: 'Din',        color: '#a855f7', avg: 4.4,  max: 5.0,  son: 5.0,  trend: 'stable' },
+    { label: 'İngilizce',  color: '#06b6d4', avg: 5.2,  max: 6.2,  son: 6.2,  trend: 'up' },
+  ]
+
+  return (
+    <div className="p-5 pointer-events-none select-none">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-5 py-3 border-b border-border">
+          <h2 className="font-semibold text-foreground text-sm">Tüm Dersler Özeti</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left px-5 py-2.5 text-muted-foreground font-medium">Ders</th>
+                <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">Ort.</th>
+                <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">Max</th>
+                <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">Son</th>
+                <th className="text-center px-3 py-2.5 text-muted-foreground font-medium">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.label} className="border-b border-border last:border-0">
+                  <td className="px-5 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: r.color }}
+                      />
+                      <span className="font-medium text-foreground">{r.label}</span>
+                    </div>
+                  </td>
+                  <td className="text-center px-3 py-2.5 font-medium text-foreground">{r.avg}</td>
+                  <td className="text-center px-3 py-2.5 text-green-500 font-medium">{r.max}</td>
+                  <td className="text-center px-3 py-2.5 font-medium text-foreground">{r.son}</td>
+                  <td className="text-center px-3 py-2.5">
+                    {r.trend === 'up' ? (
+                      <span className="inline-flex items-center gap-1 text-green-500 font-medium">
+                        <TrendingUp className="h-3.5 w-3.5" /> Artış
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-muted-foreground font-medium">
+                        <Minus className="h-3.5 w-3.5" /> Stabil
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── NetTakipTeaser ───────────────────────────────────────────────────────────
+function NetTakipTeaser() {
+  const [slideIndex, setSlideIndex] = useState(0)
+
+  const slides = [
+    { baslik: 'lgs-platform.com/panel/net-takip — İstatistikler', content: <Slide1 /> },
+    { baslik: 'lgs-platform.com/panel/net-takip — Gelişim Grafiği', content: <Slide2 /> },
+    { baslik: 'lgs-platform.com/panel/net-takip — Dersler Özeti', content: <Slide3 /> },
+  ]
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % slides.length)
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [slides.length])
+
+  const slide = slides[slideIndex]
+
+  const features = [
+    'Tüm deneme geçmişi grafikte',
+    'Ders bazlı net takibi',
+    'Trend analizi',
+    'Karne verilerinden otomatik',
+  ]
+
+  return (
+    <div className="min-h-screen py-8 sm:py-12">
+      <div className="mx-auto max-w-3xl px-4 lg:px-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 rounded-lg bg-green-500/10">
+            <TrendingUp className="h-6 w-6 text-green-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Net Takip</h1>
+            <p className="text-sm text-muted-foreground">Deneme sınavlarındaki net gelişimin</p>
+          </div>
+        </div>
+
+        {/* Slide window */}
+        <div className="relative rounded-2xl border border-border bg-card overflow-hidden shadow-xl mb-6">
+          {/* Lock badge */}
+          <div className="absolute top-14 right-4 z-10 flex items-center gap-1.5 rounded-full bg-background/90 backdrop-blur-sm border border-border px-3 py-1.5 shadow-lg">
+            <Lock className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-semibold text-foreground">Premium</span>
+          </div>
+
+          {/* Fake browser bar */}
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/50">
+            <div className="flex gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+            </div>
+            <div className="flex-1 text-center text-[11px] text-muted-foreground font-medium">
+              {slide.baslik}
+            </div>
+            <Lock className="w-3.5 h-3.5 text-muted-foreground/50" />
+          </div>
+
+          {/* Slide content */}
+          <div className="min-h-[260px]">
+            {slide.content}
+          </div>
+
+          {/* Blur overlay at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-card/80 to-transparent pointer-events-none" />
+        </div>
+
+        {/* Slide dots */}
+        <div className="flex justify-center gap-2 mb-8">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setSlideIndex(i)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                i === slideIndex ? 'bg-primary w-5' : 'bg-border hover:bg-muted-foreground/50'
+              }`}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* CTA card */}
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <span className="font-semibold text-foreground">Premium ile Net Takip</span>
+          </div>
+
+          {/* Features list */}
+          <ul className="space-y-2 mb-6">
+            {features.map((f) => (
+              <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <svg className="h-4 w-4 text-green-500 flex-shrink-0" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-2xl font-bold text-foreground">99₺</span>
+              <span className="text-sm text-muted-foreground">/ay</span>
+            </div>
+            <Link
+              href="/premium"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Premium'a Geç
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function NetTakipPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
+  const { isPremium } = usePremium()
   const [denemeler, setDenemeler] = useState<Deneme[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [selected, setSelected] = useState<string>('toplam')
@@ -110,6 +517,8 @@ export default function NetTakipPage() {
       </div>
     )
   }
+
+  if (!isPremium) return <NetTakipTeaser />
 
   // Chart verisi
   const chartData = denemeler.map((d) => {
