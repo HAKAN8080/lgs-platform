@@ -62,7 +62,6 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    // LGS 2026: 14 Haziran 2026 Pazar, saat 10:00 (sınav başlangıç saati)
     const lgsDate = new Date('2026-06-14T10:00:00').getTime()
 
     const calculateTimeLeft = () => {
@@ -81,14 +80,41 @@ export default function Home() {
 
     calculateTimeLeft()
     const timer = setInterval(calculateTimeLeft, 1000)
-
     return () => clearInterval(timer)
   }, [])
 
   return (
     <div className="relative">
+      {/* Countdown Widget - Sağ Üst Köşe */}
+      <div className="fixed top-20 right-4 z-40 hidden sm:block">
+        <div className="rounded-xl border border-border bg-card/90 backdrop-blur-sm p-3 shadow-lg text-center">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2 justify-center">
+            <Clock className="h-3 w-3" />
+            <span>LGS 2026</span>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-primary/10 rounded-lg px-2 py-1">
+              <div className="text-lg font-bold text-primary leading-none">{timeLeft.days}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Gün</div>
+            </div>
+            <div className="bg-primary/10 rounded-lg px-2 py-1">
+              <div className="text-lg font-bold text-primary leading-none">{timeLeft.hours}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Saat</div>
+            </div>
+            <div className="bg-primary/10 rounded-lg px-2 py-1">
+              <div className="text-lg font-bold text-primary leading-none">{timeLeft.minutes}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Dakika</div>
+            </div>
+            <div className="bg-primary/10 rounded-lg px-2 py-1">
+              <div className="text-lg font-bold text-primary leading-none">{timeLeft.seconds}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">Saniye</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 sm:py-32">
+      <section className="relative overflow-hidden py-16 sm:py-24">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="mx-auto max-w-7xl px-4 lg:px-8 relative">
           <div className="text-center">
@@ -99,33 +125,7 @@ export default function Home() {
             <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
               Puan hesaplama, net takip, konu analizi ve AI destekli koçluk ile hayalindeki liseye bir adım daha yaklaş.
             </p>
-
-            {/* LGS Countdown */}
-            <div className="mt-8 mb-6">
-              <div className="inline-flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                <Clock className="h-4 w-4" />
-                <span>LGS 2026&apos;ya Kalan Süre</span>
-              </div>
-              <div className="flex items-center justify-center gap-3 sm:gap-6">
-                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
-                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.days}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Gün</div>
-                </div>
-                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
-                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.hours}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Saat</div>
-                </div>
-                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
-                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.minutes}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Dakika</div>
-                </div>
-                <div className="flex flex-col items-center bg-card border border-border rounded-lg p-3 sm:p-4 min-w-[70px] sm:min-w-[90px]">
-                  <div className="text-2xl sm:text-4xl font-bold text-primary">{timeLeft.seconds}</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Saniye</div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-10 flex items-center justify-center gap-x-4">
+            <div className="mt-8 flex items-center justify-center gap-x-4">
               <Link
                 href="/araclar/puan-hesaplama"
                 className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
@@ -139,14 +139,34 @@ export default function Home() {
                 Ücretsiz Başla
               </Link>
             </div>
+            {/* Mobil sayaç */}
+            <div className="mt-8 sm:hidden">
+              <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+                <Clock className="h-3 w-3" />
+                <span>LGS 2026&apos;ya Kalan Süre</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                {[
+                  { val: timeLeft.days, label: 'Gün' },
+                  { val: timeLeft.hours, label: 'Saat' },
+                  { val: timeLeft.minutes, label: 'Dk' },
+                  { val: timeLeft.seconds, label: 'Sn' },
+                ].map(({ val, label }) => (
+                  <div key={label} className="bg-card border border-border rounded-lg px-3 py-2 min-w-[56px]">
+                    <div className="text-xl font-bold text-primary">{val}</div>
+                    <div className="text-xs text-muted-foreground">{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Tools Section */}
-      <section className="py-16 sm:py-24">
+      <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-foreground">Ücretsiz Araçlar</h2>
             <p className="mt-4 text-muted-foreground">Hemen kullanmaya başla, kayıt gerektirmez</p>
           </div>
