@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock, CalendarDays } from 'lucide-react'
 
 const tools = [
@@ -114,49 +115,65 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-16 sm:py-24">
+      <section className="relative overflow-hidden py-10 sm:py-16">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="mx-auto max-w-7xl px-4 lg:px-8 relative">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-              LGS&apos;ye Hazırlık
-              <span className="text-primary"> Artık Daha Kolay</span>
-            </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-              Puan hesaplama, net takip, konu analizi ve AI destekli koçluk ile hayalindeki liseye bir adım daha yaklaş.
-            </p>
-            <div className="mt-8 flex items-center justify-center gap-x-4">
-              <Link
-                href="/araclar/puan-hesaplama"
-                className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
-              >
-                Puan Hesapla
-              </Link>
-              <Link
-                href="/kayit"
-                className="rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
-              >
-                Ücretsiz Başla
-              </Link>
-            </div>
-            {/* Mobil sayaç */}
-            <div className="mt-8 sm:hidden">
-              <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-                <Clock className="h-3 w-3" />
-                <span>LGS 2026&apos;ya Kalan Süre</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            {/* Metin */}
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                LGS&apos;ye Hazırlık
+                <span className="text-primary"> Artık Daha Kolay</span>
+              </h1>
+              <p className="mt-5 text-lg leading-8 text-muted-foreground">
+                Puan hesaplama, net takip, konu analizi ve AI destekli koçluk ile hayalindeki liseye bir adım daha yaklaş.
+              </p>
+              <div className="mt-7 flex items-center gap-x-4">
+                <Link
+                  href="/araclar/puan-hesaplama"
+                  className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
+                >
+                  Puan Hesapla
+                </Link>
+                <Link
+                  href="/kayit"
+                  className="rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+                >
+                  Ücretsiz Başla
+                </Link>
               </div>
-              <div className="flex items-center justify-center gap-2">
-                {[
-                  { val: timeLeft.days, label: 'Gün' },
-                  { val: timeLeft.hours, label: 'Saat' },
-                  { val: timeLeft.minutes, label: 'Dk' },
-                  { val: timeLeft.seconds, label: 'Sn' },
-                ].map(({ val, label }) => (
-                  <div key={label} className="bg-card border border-border rounded-lg px-3 py-2 min-w-[56px]">
-                    <div className="text-xl font-bold text-primary">{val}</div>
-                    <div className="text-xs text-muted-foreground">{label}</div>
-                  </div>
-                ))}
+              {/* Mobil sayaç */}
+              <div className="mt-7 sm:hidden">
+                <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+                  <Clock className="h-3 w-3" />
+                  <span>LGS 2026&apos;ya Kalan Süre</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {[
+                    { val: timeLeft.days, label: 'Gün' },
+                    { val: timeLeft.hours, label: 'Saat' },
+                    { val: timeLeft.minutes, label: 'Dk' },
+                    { val: timeLeft.seconds, label: 'Sn' },
+                  ].map(({ val, label }) => (
+                    <div key={label} className="bg-card border border-border rounded-lg px-3 py-2 min-w-[52px] text-center">
+                      <div className="text-xl font-bold text-primary">{val}</div>
+                      <div className="text-xs text-muted-foreground">{label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Görsel */}
+            <div className="hidden lg:block">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-border h-[340px]">
+                <Image
+                  src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
+                  alt="Kütüphane ve kitaplar"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
               </div>
             </div>
           </div>
@@ -164,7 +181,7 @@ export default function Home() {
       </section>
 
       {/* Tools Section */}
-      <section className="py-12 sm:py-16">
+      <section className="py-8 sm:py-12">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-foreground">Ücretsiz Araçlar</h2>
