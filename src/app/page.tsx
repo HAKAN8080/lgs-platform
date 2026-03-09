@@ -181,13 +181,13 @@ export default function Home() {
             <div className="hidden lg:flex items-end justify-center">
               <div className="relative w-full h-[400px] rounded-tl-3xl rounded-tr-3xl overflow-hidden shadow-2xl border-t border-l border-r border-border">
                 <Image
-                  src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"
-                  alt="Kütüphane ve kitaplar"
+                  src="https://cdnpub.egitim.com/egitim_com/public//uploads/content-section/3fd49af43c1fc8ae5670a91658d1d21febfde5cd.webp"
+                  alt="Eğitim"
                   fill
                   className="object-cover object-center"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/30 via-transparent to-transparent" />
               </div>
             </div>
 
@@ -273,12 +273,12 @@ export default function Home() {
             </div>
             <div className="hidden lg:block relative h-[380px] rounded-2xl overflow-hidden border border-border shadow-xl">
               <Image
-                src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80"
-                alt="Çalışma ortamı"
+                src="https://cdnpub.egitim.com/egitim_com/public//uploads/content-section/00dc10c52bad7c13e3f1b137b20be487f284dc36.webp"
+                alt="Öğrenci çalışma"
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-tr from-background/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-background/20 to-transparent" />
             </div>
           </div>
         </div>

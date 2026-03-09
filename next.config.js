@@ -6,6 +6,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdnpub.egitim.com' },
+      { protocol: 'https', hostname: 'play-lh.googleusercontent.com' },
     ],
   },
   webpack: (config) => {
