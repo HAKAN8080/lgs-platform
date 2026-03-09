@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
   ReferenceLine,
+  LabelList,
 } from 'recharts'
 import { TrendingUp, TrendingDown, Minus, Loader2, ArrowLeft, BarChart3, Lock, ArrowRight, Sparkles } from 'lucide-react'
 import Link from 'next/link'
@@ -789,7 +790,7 @@ export default function NetTakipPage() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <LineChart data={chartData} margin={{ top: 20, right: 10, left: -10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis
                       dataKey="tarih"
@@ -830,7 +831,15 @@ export default function NetTakipPage() {
                       strokeWidth={2.5}
                       dot={{ r: 4, fill: selectedDers.color, strokeWidth: 0 }}
                       activeDot={{ r: 6 }}
-                    />
+                    >
+                      <LabelList
+                        dataKey={chartKey}
+                        position="top"
+                        fontSize={10}
+                        fill={selectedDers.color}
+                        formatter={(v: number) => `${v}${tooltipSuffix}`}
+                      />
+                    </Line>
                   </LineChart>
                 </ResponsiveContainer>
               )}

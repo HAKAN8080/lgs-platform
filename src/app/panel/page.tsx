@@ -111,6 +111,7 @@ export default function PanelPage() {
   const [editDenemeAdi, setEditDenemeAdi] = useState('')
   const [editTarih, setEditTarih] = useState('')
   const [editSaving, setEditSaving] = useState(false)
+  const [showAllDenemeler, setShowAllDenemeler] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -376,7 +377,7 @@ export default function PanelPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {denemeler.slice(0, 10).map((deneme) => (
+                {(showAllDenemeler ? denemeler : denemeler.slice(0, 10)).map((deneme) => (
                   <div
                     key={deneme.id}
                     className="flex items-center justify-between p-4 rounded-lg border border-border bg-accent/30 hover:bg-accent/50 transition-colors"
@@ -415,9 +416,12 @@ export default function PanelPage() {
                   </div>
                 ))}
                 {denemeler.length > 10 && (
-                  <div className="text-center text-sm text-muted-foreground">
-                    +{denemeler.length - 10} deneme daha
-                  </div>
+                  <button
+                    onClick={() => setShowAllDenemeler(p => !p)}
+                    className="w-full text-center text-sm text-primary hover:text-primary/80 font-medium py-2 transition-colors"
+                  >
+                    {showAllDenemeler ? 'Daha az göster ↑' : `+${denemeler.length - 10} deneme daha göster ↓`}
+                  </button>
                 )}
               </div>
             )}
