@@ -27,6 +27,8 @@ interface Deneme {
   toplamNet: number
   puan: number
   netler: Record<string, number>
+  tip?: 'deneme' | 'izleme'
+  soruSayisi?: Record<string, number>
 }
 
 const DERSLER = [
@@ -487,6 +489,8 @@ export default function NetTakipPage() {
   const [denemeler, setDenemeler] = useState<Deneme[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [selected, setSelected] = useState<string>('toplam')
+  const [displayMode, setDisplayMode] = useState<'net' | 'puan' | 'yuzde'>('net')
+  const [tableFilter, setTableFilter] = useState<'tumu' | 'denemeler' | 'izlemeler'>('denemeler')
 
   useEffect(() => {
     if (!loading && !user) router.push('/giris')
@@ -520,31 +524,108 @@ export default function NetTakipPage() {
 
   if (!isPremium) return <NetTakipTeaser />
 
-  // Chart verisi
-  const chartData = denemeler.map((d) => {
-    const netler = normalizeNetler(d.netler ?? {})
-    const row: Record<string, string | number> = {
-      name: `${d.yayinAdi} ${d.denemeAdi}`,
-      tarih: new Date(d.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }),
-      toplam: Math.round(d.toplamNet * 10) / 10,
+  // ─── Global filter (affects both chart and table) ─────────────────────────
+  const baseFiltered = tableFilter === 'tumu'
+    ? denemeler
+    : tableFilter === 'izlemeler'
+      ? denemeler.filter(d => d.tip === 'izleme')
+      : denemeler.filter(d => d.tip !== 'izleme')
+
+  // For the summary table
+  const denemeleriForTable = baseFiltered
+
+  // ─── Helper: get soruSayisi for a ders in a deneme ────────────────────────
+  const getSoruSayisi = (d: Deneme, ders: string): number => {
+    if (d.tip === 'izleme' && d.soruSayisi?.[ders]) {
+      return d.soruSayisi[ders]
     }
-    for (const der of DERSLER.filter(x => x.key !== 'toplam')) {
-      row[der.key] = Math.round((netler[der.key] ?? 0) * 10) / 10
+    return DERSLER.find(x => x.key === ders)?.maxNet ?? 10
+  }
+
+  // ─── Active denemeler & chart data ───────────────────────────────────────
+  const activeDenemeler = baseFiltered.filter(d => {
+    if (selected === 'toplam') return d.tip !== 'izleme'
+    if (d.tip === 'izleme') {
+      const netler = normalizeNetler(d.netler ?? {})
+      const val = netler[selected]
+      return val !== undefined && val !== null && val > 0
     }
-    return row
+    return true
   })
 
+  const chartData = activeDenemeler.map((d) => {
+    const netler = normalizeNetler(d.netler ?? {})
+    const label = `${d.yayinAdi} ${d.denemeAdi}`
+    const tarihLabel = new Date(d.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })
+
+    if (selected === 'toplam') {
+      return {
+        name: label,
+        tarih: tarihLabel,
+        toplam: Math.round(d.toplamNet * 10) / 10,
+        puan: Math.round(d.puan * 10) / 10,
+        tip: d.tip ?? 'deneme',
+      }
+    }
+
+    const net = Math.round((netler[selected] ?? 0) * 10) / 10
+    const soruSayisi = getSoruSayisi(d, selected)
+    const yuzde = soruSayisi > 0 ? Math.round((net / soruSayisi) * 1000) / 10 : 0
+
+    return {
+      name: label,
+      tarih: tarihLabel,
+      net,
+      yuzde,
+      tip: d.tip ?? 'deneme',
+    }
+  })
+
+  // ─── Chart key & domain ───────────────────────────────────────────────────
   const selectedDers = DERSLER.find(d => d.key === selected)!
-  const values = chartData.map(r => r[selected] as number)
+
+  let chartKey: string
+  let chartDomain: [number, number]
+
+  if (selected === 'toplam' && displayMode === 'puan') {
+    chartKey = 'puan'
+    chartDomain = [200, 500]
+  } else if (selected === 'toplam' && displayMode === 'net') {
+    chartKey = 'toplam'
+    chartDomain = [0, 90]
+  } else if (selected !== 'toplam' && displayMode === 'yuzde') {
+    chartKey = 'yuzde'
+    chartDomain = [0, 100]
+  } else {
+    // selected !== 'toplam' && displayMode === 'net'
+    chartKey = 'net'
+    chartDomain = [0, selectedDers.maxNet]
+  }
+
+  // ─── Stats ────────────────────────────────────────────────────────────────
+  const values = chartData.map(r => (r as Record<string, unknown>)[chartKey] as number)
   const avg = values.length ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10 : 0
   const max = values.length ? Math.max(...values) : 0
   const min = values.length ? Math.min(...values) : 0
   const trnd = trend(values)
 
-  const showAllLines = selected === 'toplam' && false // toplam seçiliyken tek çizgi
-  const linesToShow = selected === 'toplam'
-    ? [DERSLER[0]] // sadece toplam
-    : [selectedDers]
+  // ─── Chart title ──────────────────────────────────────────────────────────
+  let chartTitle: string
+  if (selected === 'toplam' && displayMode === 'net') {
+    chartTitle = 'Toplam Net — Deneme Bazlı Gelişim'
+  } else if (selected === 'toplam' && displayMode === 'puan') {
+    chartTitle = 'LGS Puanı — Deneme Bazlı Gelişim'
+  } else if (displayMode === 'yuzde') {
+    chartTitle = `${selectedDers.label} — Başarı % Gelişim`
+  } else {
+    chartTitle = `${selectedDers.label} — Net Gelişim`
+  }
+
+  // ─── Tooltip unit ─────────────────────────────────────────────────────────
+  const tooltipSuffix = displayMode === 'yuzde' ? '%' : ''
+
+  // ─── Reference line label unit ────────────────────────────────────────────
+  const refLineUnit = displayMode === 'yuzde' ? '%' : displayMode === 'puan' ? '' : ''
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
@@ -576,12 +657,52 @@ export default function NetTakipPage() {
           </div>
         ) : (
           <>
+            {/* Global filter + Display mode toggle */}
+            <div className="flex items-center gap-2 mb-4 justify-between flex-wrap">
+              {/* Deneme / İzleme / Tümü global filtresi */}
+              <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                {(['denemeler', 'izlemeler', 'tumu'] as const).map(f => (
+                  <button key={f} onClick={() => setTableFilter(f)}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                      tableFilter === f ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
+                    }`}>
+                    {f === 'denemeler' ? 'Denemeler' : f === 'izlemeler' ? 'İzlemeler' : 'Tümü'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Net / Puan / Yüzde görünüm modu */}
+              {selected === 'toplam' ? (
+                <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                  {(['net', 'puan'] as const).map(m => (
+                    <button key={m} onClick={() => setDisplayMode(m)}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                        displayMode === m ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
+                      }`}>
+                      {m === 'net' ? 'Net' : 'Puan'}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                  {(['net', 'yuzde'] as const).map(m => (
+                    <button key={m} onClick={() => setDisplayMode(m)}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                        displayMode === m ? 'bg-card shadow text-foreground' : 'text-muted-foreground'
+                      }`}>
+                      {m === 'net' ? 'Net' : 'Başarı %'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Ders Seçici */}
             <div className="flex flex-wrap gap-2 mb-6">
               {DERSLER.map((d) => (
                 <button
                   key={d.key}
-                  onClick={() => setSelected(d.key)}
+                  onClick={() => { setSelected(d.key); setDisplayMode('net') }}
                   className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all border ${
                     selected === d.key
                       ? 'text-white border-transparent'
@@ -598,16 +719,23 @@ export default function NetTakipPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">Ortalama</div>
-                <div className="text-2xl font-bold text-foreground">{avg}</div>
-                <div className="text-xs text-muted-foreground">/ {selectedDers.maxNet}</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {avg}{tooltipSuffix}
+                </div>
+                {displayMode === 'net' && selected !== 'toplam' && (
+                  <div className="text-xs text-muted-foreground">/ {selectedDers.maxNet}</div>
+                )}
+                {displayMode === 'net' && selected === 'toplam' && (
+                  <div className="text-xs text-muted-foreground">/ 90</div>
+                )}
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">En Yüksek</div>
-                <div className="text-2xl font-bold text-green-500">{max}</div>
+                <div className="text-2xl font-bold text-green-500">{max}{tooltipSuffix}</div>
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">En Düşük</div>
-                <div className="text-2xl font-bold text-red-500">{min}</div>
+                <div className="text-2xl font-bold text-red-500">{min}{tooltipSuffix}</div>
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">Trend</div>
@@ -623,9 +751,9 @@ export default function NetTakipPage() {
             {/* Chart */}
             <div className="rounded-xl border border-border bg-card p-6 mb-6">
               <h2 className="text-sm font-medium text-muted-foreground mb-4">
-                {selectedDers.label} — Deneme Bazlı Gelişim
+                {chartTitle}
               </h2>
-              {denemeler.length < 2 ? (
+              {activeDenemeler.length < 2 ? (
                 <div className="text-center py-8 text-sm text-muted-foreground">
                   Grafik için en az 2 deneme gerekiyor
                 </div>
@@ -640,7 +768,7 @@ export default function NetTakipPage() {
                       axisLine={false}
                     />
                     <YAxis
-                      domain={[0, selectedDers.maxNet]}
+                      domain={chartDomain}
                       tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                       tickLine={false}
                       axisLine={false}
@@ -652,7 +780,7 @@ export default function NetTakipPage() {
                         borderRadius: '8px',
                         fontSize: '12px',
                       }}
-                      formatter={(val: number) => [val, selectedDers.label]}
+                      formatter={(val: number) => [`${val}${tooltipSuffix}`, selectedDers.label]}
                       labelFormatter={(label, payload) => {
                         const item = payload?.[0]?.payload
                         return item ? item.name : label
@@ -663,19 +791,16 @@ export default function NetTakipPage() {
                       stroke={selectedDers.color}
                       strokeDasharray="4 4"
                       strokeOpacity={0.5}
-                      label={{ value: `Ort: ${avg}`, fontSize: 10, fill: selectedDers.color, position: 'insideTopRight' }}
+                      label={{ value: `Ort: ${avg}${refLineUnit}`, fontSize: 10, fill: selectedDers.color, position: 'insideTopRight' }}
                     />
-                    {linesToShow.map((d) => (
-                      <Line
-                        key={d.key}
-                        type="monotone"
-                        dataKey={d.key}
-                        stroke={d.color}
-                        strokeWidth={2.5}
-                        dot={{ r: 4, fill: d.color, strokeWidth: 0 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    ))}
+                    <Line
+                      type="monotone"
+                      dataKey={chartKey}
+                      stroke={selectedDers.color}
+                      strokeWidth={2.5}
+                      dot={{ r: 4, fill: selectedDers.color, strokeWidth: 0 }}
+                      activeDot={{ r: 6 }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               )}
@@ -692,6 +817,7 @@ export default function NetTakipPage() {
                     <tr className="border-b border-border">
                       <th className="text-left px-6 py-3 text-muted-foreground font-medium">Ders</th>
                       <th className="text-center px-4 py-3 text-muted-foreground font-medium">Ort.</th>
+                      <th className="text-center px-4 py-3 text-muted-foreground font-medium">Net%</th>
                       <th className="text-center px-4 py-3 text-muted-foreground font-medium">Max</th>
                       <th className="text-center px-4 py-3 text-muted-foreground font-medium">Son</th>
                       <th className="text-center px-4 py-3 text-muted-foreground font-medium">Trend</th>
@@ -699,16 +825,30 @@ export default function NetTakipPage() {
                   </thead>
                   <tbody>
                     {DERSLER.map((d) => {
-                      const vals = chartData.map(r => r[d.key] as number)
-                      const a = vals.length ? Math.round(vals.reduce((x, y) => x + y, 0) / vals.length * 10) / 10 : 0
-                      const mx = vals.length ? Math.max(...vals) : 0
-                      const last = vals.length ? vals[vals.length - 1] : 0
-                      const t = trend(vals)
+                      const tableNetler = denemeleriForTable
+                        .filter(rec => {
+                          if (d.key === 'toplam') return rec.tip !== 'izleme'
+                          if (rec.tip === 'izleme') {
+                            const netler = normalizeNetler(rec.netler ?? {})
+                            const val = netler[d.key]
+                            return val !== undefined && val > 0
+                          }
+                          return true
+                        })
+                        .map(rec => {
+                          const netler = normalizeNetler(rec.netler ?? {})
+                          if (d.key === 'toplam') return Math.round(rec.toplamNet * 10) / 10
+                          return Math.round((netler[d.key] ?? 0) * 10) / 10
+                        })
+                      const a = tableNetler.length ? Math.round(tableNetler.reduce((x, y) => x + y, 0) / tableNetler.length * 10) / 10 : 0
+                      const mx = tableNetler.length ? Math.max(...tableNetler) : 0
+                      const last = tableNetler.length ? tableNetler[tableNetler.length - 1] : 0
+                      const t = trend(tableNetler)
                       const pct = Math.round((a / d.maxNet) * 100)
                       return (
                         <tr
                           key={d.key}
-                          onClick={() => setSelected(d.key)}
+                          onClick={() => { setSelected(d.key); setDisplayMode('net') }}
                           className={`border-b border-border last:border-0 cursor-pointer transition-colors ${
                             selected === d.key ? 'bg-accent/50' : 'hover:bg-accent/30'
                           }`}
@@ -723,6 +863,7 @@ export default function NetTakipPage() {
                             </div>
                           </td>
                           <td className="text-center px-4 py-3 font-medium text-foreground">{a}</td>
+                          <td className="text-center px-4 py-3 font-medium text-indigo-400">{pct}%</td>
                           <td className="text-center px-4 py-3 text-green-500 font-medium">{mx}</td>
                           <td className="text-center px-4 py-3 font-medium text-foreground">{last}</td>
                           <td className="text-center px-4 py-3">
@@ -739,6 +880,9 @@ export default function NetTakipPage() {
                     })}
                   </tbody>
                 </table>
+              </div>
+              <div className="px-6 py-3 border-t border-border">
+                <p className="text-xs text-muted-foreground">* Net% = Ortalama Net / Maksimum Soru Sayısı × 100</p>
               </div>
             </div>
           </>
