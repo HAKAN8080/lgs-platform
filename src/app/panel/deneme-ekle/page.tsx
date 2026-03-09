@@ -82,6 +82,13 @@ export default function DenemeEklePage() {
   // İzleme için
   const [izlemeDers, setIzlemeDers] = useState<string>('turkce')
   const [izlemeSoruSayisi, setIzlemeSoruSayisi] = useState<number>(20)
+
+  // İzleme dersi değişince soru sayısını o dersin max'ına otomatik sıfırla
+  useEffect(() => {
+    const dersMax = DERSLER.find(d => d.key === izlemeDers)?.max ?? 20
+    setIzlemeSoruSayisi(dersMax)
+    setDersler(prev => ({ ...prev, [izlemeDers]: { dogru: 0, yanlis: 0 } }))
+  }, [izlemeDers])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -130,7 +137,7 @@ export default function DenemeEklePage() {
 
   const handleDersChange = (ders: string, field: 'dogru' | 'yanlis', value: string) => {
     const numValue = Math.max(0, parseInt(value) || 0)
-    const maxValue = DERSLER.find(d => d.key === ders)?.max || 20
+    const maxValue = tip === 'izleme' ? izlemeSoruSayisi : (DERSLER.find(d => d.key === ders)?.max || 20)
 
     setDersler(prev => {
       const current = prev[ders]
