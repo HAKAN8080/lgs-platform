@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth, usePremium } from '@/contexts/auth-context';
 import {
   stratejiHesapla,
   gunlukProgramOlustur,
@@ -11,7 +12,11 @@ import {
   type GunlukProgram,
   type StratejSonuc,
 } from '@/lib/calculations/strateji-motoru';
-import { Loader2, ChevronRight, ChevronLeft, Check, AlertTriangle, Database, PenLine } from 'lucide-react';
+import {
+  Loader2, ChevronRight, ChevronLeft, Check, AlertTriangle,
+  Database, PenLine, Sparkles, Lock, CalendarDays, BarChart3,
+  Clock, Zap, ArrowRight,
+} from 'lucide-react';
 
 // ─── Sabitler ────────────────────────────────────────────────────────────────
 const GUNLER = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
@@ -38,9 +43,217 @@ const KEY_MAP: Record<string, DersKey> = {
 
 type Musaitlik = Record<string, number[]>;
 
+// ─── Premium Teaser Slaytları ─────────────────────────────────────────────
+const SLIDES = [
+  {
+    id: 1,
+    icon: Clock,
+    baslik: 'Müsaitliğini Gir',
+    aciklama: 'Hangi günler, hangi saatler çalışabileceğini belirt.',
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+    preview: (
+      <div className="mt-4 rounded-xl border border-border bg-card/60 p-4 text-sm">
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((g, i) => (
+            <div key={g} className="text-center text-xs font-semibold text-muted-foreground">{g}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {[3, 2, 4, 2, 3, 5, 0].map((saat, i) => (
+            <div key={i} className={`rounded-lg py-2 text-center text-xs font-bold ${saat > 0 ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground/30'}`}>
+              {saat > 0 ? `${saat}s` : '–'}
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex justify-end">
+          <div className="bg-primary/20 text-primary text-xs font-semibold px-3 py-1 rounded-full">19 saat/hafta</div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 2,
+    icon: BarChart3,
+    baslik: 'Deneme Verilerini Kullan',
+    aciklama: 'Mevcut deneme netlerinle strateji otomatik hesaplanır.',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    preview: (
+      <div className="mt-4 rounded-xl border border-border bg-card/60 p-4">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: 'Türkçe', val: 14.2, max: 20, color: 'bg-blue-500' },
+            { label: 'Matematik', val: 8.7, max: 20, color: 'bg-orange-500' },
+            { label: 'Fen', val: 11.3, max: 20, color: 'bg-emerald-500' },
+            { label: 'İnkılap', val: 7.1, max: 10, color: 'bg-purple-500' },
+            { label: 'Din', val: 6.4, max: 10, color: 'bg-pink-500' },
+            { label: 'İngilizce', val: 5.9, max: 10, color: 'bg-yellow-500' },
+          ].map((d) => (
+            <div key={d.label} className="bg-muted/50 rounded-lg p-2.5">
+              <div className="text-[10px] text-muted-foreground mb-1">{d.label}</div>
+              <div className="text-sm font-bold text-foreground">{d.val}</div>
+              <div className="mt-1.5 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${d.color}`} style={{ width: `${(d.val / d.max) * 100}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 3,
+    icon: CalendarDays,
+    baslik: 'Haftalık Program Oluşturulur',
+    aciklama: 'Zayıf derslere daha fazla süre — AI destekli optimizasyon.',
+    color: 'text-purple-500',
+    bg: 'bg-purple-500/10',
+    preview: (
+      <div className="mt-4 rounded-xl border border-border bg-card/60 p-3">
+        <div className="space-y-1.5">
+          {[
+            { gun: 'Pazartesi', bloklar: [{ ders: '📐 Matematik', color: 'bg-orange-500/20 text-orange-400' }, { ders: '📖 Türkçe', color: 'bg-blue-500/20 text-blue-400' }] },
+            { gun: 'Salı', bloklar: [{ ders: '🔬 Fen', color: 'bg-emerald-500/20 text-emerald-400' }, { ders: '📐 Matematik', color: 'bg-orange-500/20 text-orange-400' }] },
+            { gun: 'Çarşamba', bloklar: [{ ders: '📖 Türkçe', color: 'bg-blue-500/20 text-blue-400' }, { ders: '🌍 İngilizce', color: 'bg-yellow-500/20 text-yellow-400' }] },
+            { gun: 'Perşembe', bloklar: [{ ders: '📐 Matematik', color: 'bg-orange-500/20 text-orange-400' }] },
+          ].map((g) => (
+            <div key={g.gun} className="flex items-center gap-2">
+              <div className="text-[10px] text-muted-foreground w-16 shrink-0">{g.gun}</div>
+              <div className="flex gap-1.5 flex-wrap">
+                {g.bloklar.map((b, i) => (
+                  <span key={i} className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${b.color}`}>{b.ders}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 4,
+    icon: Zap,
+    baslik: 'LGS\'ye Göre Yoğunluk',
+    aciklama: 'LGS tarihine yaklaştıkça program otomatik yoğunlaşır.',
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    preview: (
+      <div className="mt-4 rounded-xl border border-border bg-card/60 p-4">
+        <div className="flex items-end justify-between gap-1 h-24">
+          {[
+            { label: 'Oca', h: 30 }, { label: 'Şub', h: 40 }, { label: 'Mar', h: 50 },
+            { label: 'Nis', h: 65 }, { label: 'May', h: 80 }, { label: 'Haz', h: 100 },
+          ].map((m) => (
+            <div key={m.label} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className="w-full rounded-t-md bg-primary/30 hover:bg-primary/50 transition-colors"
+                style={{ height: `${m.h}%` }}
+              />
+              <div className="text-[9px] text-muted-foreground">{m.label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 text-center text-xs text-amber-500 font-medium">LGS: Haziran 2026</div>
+      </div>
+    ),
+  },
+];
+
+// ─── Premium Teaser Bileşeni ──────────────────────────────────────────────
+function PremiumTeaser() {
+  const [aktif, setAktif] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setAktif(p => (p + 1) % SLIDES.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const slide = SLIDES[aktif];
+  const Icon = slide.icon;
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-10">
+      {/* Başlık */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 mb-4">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Premium Özellik</span>
+        </div>
+        <h1 className="text-2xl font-bold text-foreground">Çalışma Programı Oluşturucu</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
+          3 adımda kişiselleştirilmiş haftalık LGS çalışma programı
+        </p>
+      </div>
+
+      {/* Slayt */}
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-lg min-h-[320px]">
+        <div className="flex items-center gap-3 mb-1">
+          <div className={`p-2.5 rounded-xl ${slide.bg}`}>
+            <Icon className={`h-5 w-5 ${slide.color}`} />
+          </div>
+          <div>
+            <div className="font-semibold text-foreground">{slide.baslik}</div>
+            <div className="text-xs text-muted-foreground">{slide.aciklama}</div>
+          </div>
+        </div>
+        {slide.preview}
+      </div>
+
+      {/* Nokta göstergesi */}
+      <div className="flex justify-center gap-2 mt-4">
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setAktif(i)}
+            className={`h-2 rounded-full transition-all duration-300 ${i === aktif ? 'w-6 bg-primary' : 'w-2 bg-border'}`}
+          />
+        ))}
+      </div>
+
+      {/* Özellik listesi */}
+      <div className="mt-6 grid grid-cols-2 gap-2">
+        {[
+          'AI destekli optimizasyon',
+          'Deneme verilerinden otomatik strateji',
+          'Günlük saat saat program',
+          'LGS\'ye göre yoğunluk ayarı',
+        ].map((f) => (
+          <div key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Check className="h-4 w-4 text-emerald-500 shrink-0" />
+            {f}
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="mt-8 rounded-xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 border border-primary/20 p-6 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-1">
+          <Lock className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Premium&apos;a geç, kilidi aç</span>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">Tüm premium özelliklere sınırsız eriş</p>
+        <div className="flex items-center justify-center gap-4">
+          <div>
+            <span className="text-2xl font-bold text-foreground">99₺</span>
+            <span className="text-sm text-muted-foreground"> / ay</span>
+          </div>
+          <Link
+            href="/premium"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Premium&apos;a Geç <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Ana Bileşen ──────────────────────────────────────────────────────────────
 export default function CalismaProgramiPage() {
   const { user, loading: authLoading } = useAuth();
+  const { isPremium } = usePremium();
   const [adim, setAdim] = useState(1);
 
   // Adım 1
@@ -63,7 +276,6 @@ export default function CalismaProgramiPage() {
   const [sonuc, setSonuc] = useState<StratejSonuc | null>(null);
   const [gunlukProgram, setGunlukProgram] = useState<GunlukProgram | null>(null);
 
-  // Mevcut programı yükle
   useEffect(() => {
     if (!user || !db) { setProgramYukleniyor(false); return; }
     const yukle = async () => {
@@ -78,7 +290,6 @@ export default function CalismaProgramiPage() {
     yukle();
   }, [user]);
 
-  // Denemeleri yükle (adım 2 açılınca)
   useEffect(() => {
     if (adim !== 2 || !user || !db) return;
     setDenemelerYukleniyor(true);
@@ -107,7 +318,32 @@ export default function CalismaProgramiPage() {
     yukle();
   }, [adim, user]);
 
-  // ─── Adım 1 ──────────────────────────────────────────────────────────────
+  // ─── Yükleniyor ──────────────────────────────────────────────────────────
+  if (authLoading || (user && programYukleniyor)) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
+  }
+
+  // Giriş yapılmamış → teaser göster (kayıt olmaya yönlendir)
+  if (!user) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-10 text-center">
+        <PremiumTeaser />
+      </div>
+    );
+  }
+
+  // Premium değil → teaser göster
+  if (!isPremium) {
+    return <PremiumTeaser />;
+  }
+
+  // ─── Premium kullanıcı: gerçek araç ──────────────────────────────────────
+  const toplamSaat = Object.values(musaitlik).reduce((t, s) => t + s.length, 0);
+
   const toggleSaat = (gun: string, saat: number) => {
     setMusaitlik((prev) => {
       const mevcutlar = prev[gun];
@@ -147,7 +383,6 @@ export default function CalismaProgramiPage() {
     }
   };
 
-  // ─── Adım 2 ──────────────────────────────────────────────────────────────
   const adim2Ileri = () => {
     const inputDenemeler =
       netMod === 'otomatik'
@@ -162,33 +397,14 @@ export default function CalismaProgramiPage() {
     setAdim(3);
   };
 
-  // ─── Yükleniyor ──────────────────────────────────────────────────────────
-  if (authLoading || programYukleniyor) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin w-8 h-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] text-muted-foreground">
-        Giriş yapmanız gerekiyor.
-      </div>
-    );
-  }
-
-  const toplamSaat = Object.values(musaitlik).reduce((t, s) => t + s.length, 0);
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Başlık */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Çalışma Programı Oluşturucu</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          3 adımda kişiselleştirilmiş haftalık ders programını oluştur.
-        </p>
+        <div className="flex items-center gap-2 mb-1">
+          <h1 className="text-2xl font-bold text-foreground">Çalışma Programı Oluşturucu</h1>
+          <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">Premium</span>
+        </div>
+        <p className="text-muted-foreground text-sm">3 adımda kişiselleştirilmiş haftalık ders programını oluştur.</p>
       </div>
 
       {/* Step indicator */}
@@ -201,17 +417,13 @@ export default function CalismaProgramiPage() {
           <div key={n} className="flex items-center gap-2 flex-1">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
-                adim > n
-                  ? 'bg-primary border-primary text-primary-foreground'
-                  : adim === n
-                  ? 'border-primary text-primary bg-primary/10'
+                adim > n ? 'bg-primary border-primary text-primary-foreground'
+                  : adim === n ? 'border-primary text-primary bg-primary/10'
                   : 'border-muted-foreground/30 text-muted-foreground/50'
               }`}>
                 {adim > n ? <Check className="w-4 h-4" /> : n}
               </div>
-              <span className={`text-sm font-medium hidden sm:block ${
-                adim === n ? 'text-foreground' : 'text-muted-foreground/60'
-              }`}>{label}</span>
+              <span className={`text-sm font-medium hidden sm:block ${adim === n ? 'text-foreground' : 'text-muted-foreground/60'}`}>{label}</span>
             </div>
             {i < arr.length - 1 && (
               <div className={`flex-1 h-0.5 mx-2 ${adim > n ? 'bg-primary' : 'bg-muted'}`} />
@@ -220,16 +432,13 @@ export default function CalismaProgramiPage() {
         ))}
       </div>
 
-      {/* ── ADIM 1: Müsaitlik ─────────────────────────────────────────────── */}
+      {/* ── ADIM 1 ── */}
       {adim === 1 && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-muted-foreground">Çalışabileceğin saat bloklarını işaretle (günlük min 2 saat).</p>
-            <div className="flex gap-3 text-sm">
-              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-medium">{toplamSaat} saat/hafta</span>
-            </div>
+            <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-medium text-sm">{toplamSaat} saat/hafta</span>
           </div>
-
           <div className="overflow-x-auto rounded-xl border bg-card shadow-sm mb-4">
             <table className="w-full text-sm">
               <thead>
@@ -271,7 +480,6 @@ export default function CalismaProgramiPage() {
               </tbody>
             </table>
           </div>
-
           {adim1Hatalar.length > 0 && (
             <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
               <div className="flex items-center gap-2 text-red-600 font-medium mb-1">
@@ -283,7 +491,6 @@ export default function CalismaProgramiPage() {
               </ul>
             </div>
           )}
-
           <div className="flex justify-end">
             <button
               onClick={adim1Ileri}
@@ -291,17 +498,15 @@ export default function CalismaProgramiPage() {
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground px-6 py-2.5 rounded-lg font-medium transition-colors"
             >
               {kaydediyor ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              İleri
-              <ChevronRight className="w-4 h-4" />
+              İleri <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ── ADIM 2: Net Girişi ────────────────────────────────────────────── */}
+      {/* ── ADIM 2 ── */}
       {adim === 2 && (
         <div>
-          {/* Mod seçici */}
           <div className="flex gap-2 mb-6 p-1 bg-muted rounded-lg w-fit">
             <button
               onClick={() => setNetMod('otomatik')}
@@ -309,8 +514,7 @@ export default function CalismaProgramiPage() {
                 netMod === 'otomatik' ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Database className="w-4 h-4" />
-              Karneden Oluştur
+              <Database className="w-4 h-4" />Karneden Oluştur
             </button>
             <button
               onClick={() => setNetMod('manuel')}
@@ -318,32 +522,24 @@ export default function CalismaProgramiPage() {
                 netMod === 'manuel' ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <PenLine className="w-4 h-4" />
-              Manuel Gir
+              <PenLine className="w-4 h-4" />Manuel Gir
             </button>
           </div>
 
           {netMod === 'otomatik' && (
             <div className="bg-card border rounded-xl p-5 mb-6">
               {denemelerYukleniyor ? (
-                <div className="flex justify-center py-6">
-                  <Loader2 className="animate-spin w-6 h-6 text-primary" />
-                </div>
+                <div className="flex justify-center py-6"><Loader2 className="animate-spin w-6 h-6 text-primary" /></div>
               ) : denemeler.length === 0 ? (
-                <p className="text-muted-foreground text-sm text-center py-4">
-                  Henüz karne/deneme verisi yok. Manuel giriş sekmesini kullan.
-                </p>
+                <p className="text-muted-foreground text-sm text-center py-4">Henüz karne/deneme verisi yok. Manuel giriş sekmesini kullan.</p>
               ) : (
                 <div>
                   <p className="text-sm text-muted-foreground mb-4">
                     Son <span className="font-medium text-foreground">{denemeler.length} deneme</span> bulundu.
-                    Bu veriler strateji hesabında kullanılacak.
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {DERSLER_MANUEL.map((d) => {
-                      const ort = denemeler.length > 0
-                        ? denemeler.reduce((s, den) => s + (den[d.key] ?? 0), 0) / denemeler.length
-                        : 0;
+                      const ort = denemeler.reduce((s, den) => s + (den[d.key] ?? 0), 0) / denemeler.length;
                       return (
                         <div key={d.key} className="bg-muted/40 rounded-lg px-3 py-2.5">
                           <div className="text-xs text-muted-foreground">{d.icon} {d.label}</div>
@@ -369,10 +565,7 @@ export default function CalismaProgramiPage() {
                       {d.icon} {d.label} <span className="text-muted-foreground/60">(max {d.max})</span>
                     </label>
                     <input
-                      type="number"
-                      min={0}
-                      max={d.max}
-                      step={0.1}
+                      type="number" min={0} max={d.max} step={0.1}
                       value={manuelNetler[d.key]}
                       onChange={(e) => setManuelNetler((prev) => ({ ...prev, [d.key]: e.target.value }))}
                       placeholder={`0 – ${d.max}`}
@@ -385,29 +578,23 @@ export default function CalismaProgramiPage() {
           )}
 
           <div className="flex justify-between">
-            <button
-              onClick={() => setAdim(1)}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-lg border hover:bg-accent transition-colors text-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Geri
+            <button onClick={() => setAdim(1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-lg border hover:bg-accent transition-colors text-sm">
+              <ChevronLeft className="w-4 h-4" />Geri
             </button>
             <button
               onClick={adim2Ileri}
               disabled={netMod === 'otomatik' && denemeler.length === 0}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground px-6 py-2.5 rounded-lg font-medium transition-colors"
             >
-              Programı Oluştur
-              <ChevronRight className="w-4 h-4" />
+              Programı Oluştur <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* ── ADIM 3: Program ───────────────────────────────────────────────── */}
+      {/* ── ADIM 3 ── */}
       {adim === 3 && sonuc && (
         <div>
-          {/* Haftalık özet */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-card border rounded-xl p-4 text-center">
               <div className="text-2xl font-bold text-foreground">{sonuc.toplamMusaitSaat}</div>
@@ -423,7 +610,6 @@ export default function CalismaProgramiPage() {
             </div>
           </div>
 
-          {/* Haftalık ders dağılımı */}
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Haftalık Dağılım</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
             {sonuc.dersler.filter((d) => d.onerilen > 0).map((d) => (
@@ -437,7 +623,6 @@ export default function CalismaProgramiPage() {
             ))}
           </div>
 
-          {/* Günlük program */}
           {gunlukProgram && Object.keys(gunlukProgram).length > 0 && (
             <>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Günlük Program</h2>
@@ -467,12 +652,8 @@ export default function CalismaProgramiPage() {
           )}
 
           <div className="flex justify-between mt-8">
-            <button
-              onClick={() => setAdim(2)}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-lg border hover:bg-accent transition-colors text-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Geri
+            <button onClick={() => setAdim(2)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground px-4 py-2.5 rounded-lg border hover:bg-accent transition-colors text-sm">
+              <ChevronLeft className="w-4 h-4" />Geri
             </button>
             <button
               onClick={() => { setAdim(1); setSonuc(null); setGunlukProgram(null); }}
