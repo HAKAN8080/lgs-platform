@@ -747,7 +747,7 @@ export default function NetTakipPage() {
             </div>
 
             {/* Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">Ortalama</div>
                 <div className="text-2xl font-bold text-foreground">
@@ -767,6 +767,11 @@ export default function NetTakipPage() {
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">En Düşük</div>
                 <div className="text-2xl font-bold text-red-500">{min}{tooltipSuffix}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="text-xs text-muted-foreground mb-1">Sınav Sayısı</div>
+                <div className="text-2xl font-bold text-foreground">{activeDenemeler.length}</div>
+                <div className="text-xs text-muted-foreground">deneme</div>
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs text-muted-foreground mb-1">Trend</div>
@@ -844,6 +849,42 @@ export default function NetTakipPage() {
                 </ResponsiveContainer>
               )}
             </div>
+
+            {/* LGS Puan Tahmini */}
+            {selected === 'toplam' && displayMode === 'net' && activeDenemeler.length >= 2 && (() => {
+              const lastNet = values[values.length - 1]
+              const avgPuan = Math.round(100 + (avg / 90) * 400)
+              const lastPuan = Math.round(100 + (lastNet / 90) * 400)
+              const realistMin = Math.round((avgPuan + lastPuan) / 2) - 5
+              const realistMax = Math.round((avgPuan + lastPuan) / 2) + 5
+              return (
+                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-5 mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="h-4 w-4 text-indigo-400" />
+                    <h2 className="font-semibold text-foreground text-sm">LGS Puan Tahmini</h2>
+                    <span className="text-xs text-muted-foreground">100 + (Net ÷ 90) × 400</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="rounded-lg bg-card border border-border p-3 text-center">
+                      <div className="text-xs text-muted-foreground mb-1">Ortalama Baz</div>
+                      <div className="text-xl font-bold text-foreground">~{avgPuan}</div>
+                      <div className="text-xs text-muted-foreground">{avg} net</div>
+                    </div>
+                    <div className="rounded-lg bg-card border border-border p-3 text-center">
+                      <div className="text-xs text-muted-foreground mb-1">Son Deneme Baz</div>
+                      <div className="text-xl font-bold text-indigo-400">~{lastPuan}</div>
+                      <div className="text-xs text-muted-foreground">{lastNet} net</div>
+                    </div>
+                    <div className="rounded-lg bg-indigo-500/10 border border-indigo-500/20 p-3 text-center">
+                      <div className="text-xs text-muted-foreground mb-1">🎯 Gerçekçi Tahmin</div>
+                      <div className="text-xl font-bold text-indigo-400">{realistMin}–{realistMax}</div>
+                      <div className="text-xs text-muted-foreground">tahmini aralık</div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">* Tahmin deneme performansına dayanır. LGS&apos;de sınav stresi ve zorluk farkı sonucu etkileyebilir.</p>
+                </div>
+              )
+            })()}
 
             {/* Tüm Dersler Özet Tablosu */}
             <div className="rounded-xl border border-border bg-card overflow-hidden">
