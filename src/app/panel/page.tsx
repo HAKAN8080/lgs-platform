@@ -85,7 +85,6 @@ const panelFeatures = [
     href: '/panel/konu-analizi',
     icon: Target,
     color: 'bg-orange-500/10 text-orange-500',
-    comingSoon: true,
   },
   {
     name: 'Haftalık Strateji',
