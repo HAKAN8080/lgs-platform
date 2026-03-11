@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BookOpen, BarChart3, Lightbulb, FileText, Clock, Target, Trophy } from 'lucide-react'
+import { BookOpen, BarChart3, Lightbulb, FileText, Clock, Target, Trophy, Calculator, Calendar, School } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'LGS Hazırlık İçerikleri | Soru Dağılımı, İstatistikler & Stratejiler',
@@ -10,11 +10,51 @@ export const metadata: Metadata = {
 
 const contents = [
   {
+    name: 'LGS 2026 Ne Zaman?',
+    description: 'LGS 2026 sınav tarihi, geri sayım ve önemli tarihler. Kalan süreyi takip et.',
+    href: '/icerik/lgs-ne-zaman',
+    icon: Calendar,
+    color: 'bg-red-500/10 text-red-500 border-red-500/20',
+    stats: '14 Haziran 2026',
+  },
+  {
+    name: 'LGS Puan Hesaplama',
+    description: 'LGS puan hesaplama formülü, ders katsayıları ve örnek hesaplamalar.',
+    href: '/icerik/lgs-puan-hesaplama',
+    icon: Calculator,
+    color: 'bg-primary/10 text-primary border-primary/20',
+    stats: '2026 Güncel',
+  },
+  {
+    name: 'LGS Net Hesaplama',
+    description: 'Net hesaplama formülü, yanlışın etkisi ve stratejik ipuçları.',
+    href: '/icerik/lgs-net-hesaplama',
+    icon: Target,
+    color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    stats: 'Formül & Örnekler',
+  },
+  {
+    name: 'LGS Taban Puanları 2025',
+    description: 'İstanbul liseleri taban puanları, yüzdelik dilimler ve kontenjanlar.',
+    href: '/icerik/lgs-taban-puanlari',
+    icon: School,
+    color: 'bg-green-500/10 text-green-500 border-green-500/20',
+    stats: '2025 Verileri',
+  },
+  {
+    name: 'LGS Çalışma Programı',
+    description: 'Etkili çalışma programı oluşturma, haftalık plan örneği ve verimli çalışma teknikleri.',
+    href: '/icerik/lgs-calisma-programi',
+    icon: Clock,
+    color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    stats: 'Haftalık Program',
+  },
+  {
     name: 'LGS Soru Dağılımları',
-    description: '2018-2025 yılları arasında çıkan LGS soruları ders ve konu bazlı detaylı analizi. En çok çıkan konuları öğren.',
+    description: '2018-2025 yılları arasında çıkan LGS soruları ders ve konu bazlı detaylı analizi.',
     href: '/icerik/soru-dagilimi',
     icon: BarChart3,
-    color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    color: 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20',
     stats: '8 Yıl • 720 Soru',
   },
   {
@@ -32,24 +72,6 @@ const contents = [
     icon: Lightbulb,
     color: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
     stats: '3 Adımda Program',
-  },
-  {
-    name: 'Konu Anlatımları',
-    description: 'Tüm dersler için kapsamlı konu anlatımları ve örnek sorular.',
-    href: '/icerik/konu-anlatimlari',
-    icon: BookOpen,
-    color: 'bg-green-500/10 text-green-500 border-green-500/20',
-    stats: 'Yakında',
-    comingSoon: true,
-  },
-  {
-    name: 'Çıkmış Sorular',
-    description: 'Yıl yıl çıkmış LGS soruları ve çözümleri.',
-    href: '/icerik/cikmis-sorular',
-    icon: FileText,
-    color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-    stats: 'Yakında',
-    comingSoon: true,
   },
 ]
 
@@ -92,18 +114,9 @@ export default function IcerikPage() {
           {contents.map((content) => (
             <Link
               key={content.name}
-              href={content.comingSoon ? '#' : content.href}
-              className={`group relative rounded-xl border bg-card p-6 transition-all duration-200 ${
-                content.comingSoon
-                  ? 'opacity-60 cursor-not-allowed'
-                  : 'hover:border-primary/50 hover:bg-accent/50'
-              }`}
+              href={content.href}
+              className="group relative rounded-xl border bg-card p-6 transition-all duration-200 hover:border-primary/50 hover:bg-accent/50"
             >
-              {content.comingSoon && (
-                <span className="absolute top-4 right-4 text-xs font-medium bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                  Yakında
-                </span>
-              )}
               <div className={`inline-flex rounded-lg p-3 border ${content.color}`}>
                 <content.icon className="h-6 w-6" />
               </div>
