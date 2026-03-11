@@ -14,6 +14,8 @@ const navigation = [
     children: [
       { name: 'LGS Puan Hesaplama', href: '/araclar/puan-hesaplama' },
       { name: 'Lise Taban Puanları', href: '/araclar/taban-puanlari' },
+      { name: 'Net Takip', href: '/panel/net-takip' },
+      { name: 'Haftalık Strateji', href: '/panel/strateji' },
       { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
       { name: 'Çalışma Programı', href: '/icerik/calisma-programi' },
     ],

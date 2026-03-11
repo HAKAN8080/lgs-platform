@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -27,8 +27,11 @@ import {
   Pencil,
   X,
   Save,
+  Filter,
+  School as SchoolIcon,
 } from 'lucide-react'
 import Link from 'next/link'
+import { SCHOOLS_DATA, getSchoolTypeColor, type School } from '@/lib/constants/schools'
 
 interface Deneme {
   id: string
@@ -112,6 +115,17 @@ export default function PanelPage() {
   const [editTarih, setEditTarih] = useState('')
   const [editSaving, setEditSaving] = useState(false)
   const [showAllDenemeler, setShowAllDenemeler] = useState(false)
+  // Filtreleme state
+  const [yayinFilter, setYayinFilter] = useState('')
+  const [denemeFilter, setDenemeFilter] = useState('')
+  // Hedef Puan Modal
+  const [showHedefPuanModal, setShowHedefPuanModal] = useState(false)
+  const [hedefPuanInput, setHedefPuanInput] = useState('')
+  const [hedefPuanSaving, setHedefPuanSaving] = useState(false)
+  // Hedef Okul Modal
+  const [showHedefOkulModal, setShowHedefOkulModal] = useState(false)
+  const [hedefOkulSearch, setHedefOkulSearch] = useState('')
+  const [hedefOkulSaving, setHedefOkulSaving] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -188,6 +202,69 @@ export default function PanelPage() {
       fetchDenemeler()
     }
   }, [user])
+
+  // Unique yayın listesi
+  const uniqueYayinlar = useMemo(() => {
+    const yayinlar = [...new Set(denemeler.map(d => d.yayinAdi))].sort()
+    return yayinlar
+  }, [denemeler])
+
+  // Filtrelenmiş denemeler
+  const filteredDenemeler = useMemo(() => {
+    return denemeler.filter(d => {
+      if (yayinFilter && d.yayinAdi !== yayinFilter) return false
+      if (denemeFilter && !d.denemeAdi.toLowerCase().includes(denemeFilter.toLowerCase())) return false
+      return true
+    })
+  }, [denemeler, yayinFilter, denemeFilter])
+
+  // Hedef Puan kaydet
+  const handleHedefPuanSave = async () => {
+    if (!user || !db) return
+    const puan = parseFloat(hedefPuanInput)
+    if (isNaN(puan) || puan < 200 || puan > 500) {
+      alert('Puan 200-500 arasında olmalıdır')
+      return
+    }
+    setHedefPuanSaving(true)
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        'profile.targetScore': puan,
+      })
+      // Reload page to refresh userData
+      window.location.reload()
+    } catch (err) {
+      console.error('Hedef puan kaydetme hatası:', err)
+    } finally {
+      setHedefPuanSaving(false)
+    }
+  }
+
+  // Hedef Okul kaydet
+  const handleHedefOkulSave = async (school: School) => {
+    if (!user || !db) return
+    setHedefOkulSaving(true)
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        'profile.targetSchool': school.lise,
+        'profile.targetSchoolScore': school.puan,
+      })
+      // Reload page to refresh userData
+      window.location.reload()
+    } catch (err) {
+      console.error('Hedef okul kaydetme hatası:', err)
+    } finally {
+      setHedefOkulSaving(false)
+    }
+  }
+
+  // Okul arama sonuçları
+  const searchedSchools = useMemo(() => {
+    if (!hedefOkulSearch || hedefOkulSearch.length < 2) return []
+    return SCHOOLS_DATA
+      .filter(s => s.lise.toLowerCase().includes(hedefOkulSearch.toLowerCase()))
+      .slice(0, 10)
+  }, [hedefOkulSearch])
 
   const handleDeleteDeneme = async (id: string) => {
     if (!db || !confirm('Bu denemeyi silmek istediğinize emin misiniz?')) return
@@ -319,17 +396,45 @@ export default function PanelPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-4 rounded-lg bg-accent/50">
                 <div className="text-sm text-muted-foreground">Email</div>
                 <div className="font-medium text-foreground truncate">{user.email}</div>
               </div>
-              <div className="p-4 rounded-lg bg-accent/50">
-                <div className="text-sm text-muted-foreground">Hedef Puan</div>
-                <div className="font-medium text-foreground">
+              <button
+                onClick={() => {
+                  setHedefPuanInput(userData?.profile?.targetScore?.toString() || '')
+                  setShowHedefPuanModal(true)
+                }}
+                className="p-4 rounded-lg bg-accent/50 hover:bg-accent transition-colors text-left group"
+              >
+                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                  Hedef Puan
+                  <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="font-medium text-foreground flex items-center gap-2">
+                  <Target className="h-4 w-4 text-primary" />
                   {userData?.profile?.targetScore || 'Belirlenmedi'}
                 </div>
-              </div>
+              </button>
+              <button
+                onClick={() => {
+                  setHedefOkulSearch('')
+                  setShowHedefOkulModal(true)
+                }}
+                className="p-4 rounded-lg bg-accent/50 hover:bg-accent transition-colors text-left group"
+              >
+                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                  Hedef Okul
+                  <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="font-medium text-foreground flex items-center gap-2">
+                  <SchoolIcon className="h-4 w-4 text-green-500" />
+                  <span className="truncate">
+                    {(userData?.profile as {targetSchool?: string})?.targetSchool || 'Seçilmedi'}
+                  </span>
+                </div>
+              </button>
               <div className="p-4 rounded-lg bg-accent/50">
                 <div className="text-sm text-muted-foreground">Üyelik</div>
                 <div className="font-medium text-foreground capitalize">{plan}</div>
@@ -349,6 +454,7 @@ export default function PanelPage() {
               <CardDescription>
                 {!isPremium && `${denemeler.length}/5 deneme kullanıldı`}
                 {isPremium && `${denemeler.length} deneme`}
+                {(yayinFilter || denemeFilter) && ` • ${filteredDenemeler.length} sonuç`}
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -367,6 +473,40 @@ export default function PanelPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Filtreleme */}
+            {denemeler.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-3 mb-4 p-3 rounded-lg bg-accent/30 border border-border">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="h-4 w-4" />
+                  Filtrele:
+                </div>
+                <select
+                  value={yayinFilter}
+                  onChange={(e) => setYayinFilter(e.target.value)}
+                  className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">Tüm Yayınlar</option>
+                  {uniqueYayinlar.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Sınav adı ara..."
+                  value={denemeFilter}
+                  onChange={(e) => setDenemeFilter(e.target.value)}
+                  className="flex-1 h-9 rounded-md border border-input bg-background px-3 text-sm"
+                />
+                {(yayinFilter || denemeFilter) && (
+                  <button
+                    onClick={() => { setYayinFilter(''); setDenemeFilter(''); }}
+                    className="h-9 px-3 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  >
+                    Temizle
+                  </button>
+                )}
+              </div>
+            )}
             {loadingDenemeler ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -375,9 +515,13 @@ export default function PanelPage() {
               <div className="text-center py-8 text-muted-foreground">
                 Henüz deneme eklenmemiş
               </div>
+            ) : filteredDenemeler.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Filtreye uygun deneme bulunamadı
+              </div>
             ) : (
               <div className="space-y-3">
-                {(showAllDenemeler ? denemeler : denemeler.slice(0, 10)).map((deneme) => (
+                {(showAllDenemeler ? filteredDenemeler : filteredDenemeler.slice(0, 10)).map((deneme) => (
                   <div
                     key={deneme.id}
                     className="flex items-center justify-between p-4 rounded-lg border border-border bg-accent/30 hover:bg-accent/50 transition-colors"
@@ -415,12 +559,12 @@ export default function PanelPage() {
                     </div>
                   </div>
                 ))}
-                {denemeler.length > 10 && (
+                {filteredDenemeler.length > 10 && (
                   <button
                     onClick={() => setShowAllDenemeler(p => !p)}
                     className="w-full text-center text-sm text-primary hover:text-primary/80 font-medium py-2 transition-colors"
                   >
-                    {showAllDenemeler ? 'Daha az göster ↑' : `+${denemeler.length - 10} deneme daha göster ↓`}
+                    {showAllDenemeler ? 'Daha az göster ↑' : `+${filteredDenemeler.length - 10} deneme daha göster ↓`}
                   </button>
                 )}
               </div>
@@ -491,6 +635,100 @@ export default function PanelPage() {
         )}
       </div>
     </div>
+
+    {/* Hedef Puan Modal */}
+    {showHedefPuanModal && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Hedef Puan Belirle
+            </h3>
+            <button onClick={() => setShowHedefPuanModal(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="p-5 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              LGS&apos;de ulaşmak istediğin hedef puanı gir (200-500 arası)
+            </p>
+            <input
+              type="number"
+              min={200}
+              max={500}
+              step={0.01}
+              value={hedefPuanInput}
+              onChange={e => setHedefPuanInput(e.target.value)}
+              placeholder="Örn: 450"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            />
+          </div>
+          <div className="flex gap-3 px-5 pb-5">
+            <button onClick={() => setShowHedefPuanModal(false)}
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors">
+              İptal
+            </button>
+            <button onClick={handleHedefPuanSave} disabled={hedefPuanSaving}
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+              {hedefPuanSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Kaydet
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Hedef Okul Modal */}
+    {showHedefOkulModal && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl max-h-[80vh] flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <SchoolIcon className="h-5 w-5 text-green-500" />
+              Hedef Okul Seç
+            </h3>
+            <button onClick={() => setShowHedefOkulModal(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="p-5 space-y-4 flex-1 overflow-hidden flex flex-col">
+            <input
+              type="text"
+              value={hedefOkulSearch}
+              onChange={e => setHedefOkulSearch(e.target.value)}
+              placeholder="Lise adı ara (en az 2 karakter)..."
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            />
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {searchedSchools.length === 0 && hedefOkulSearch.length >= 2 && (
+                <p className="text-sm text-muted-foreground text-center py-4">Sonuç bulunamadı</p>
+              )}
+              {searchedSchools.map((school, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleHedefOkulSave(school)}
+                  disabled={hedefOkulSaving}
+                  className="w-full p-3 rounded-lg border border-border bg-accent/30 hover:bg-accent/50 transition-colors text-left disabled:opacity-50"
+                  style={{ borderLeftColor: getSchoolTypeColor(school.tur), borderLeftWidth: 4 }}
+                >
+                  <div className="font-medium text-foreground text-sm">{school.lise}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {school.ilce} • {school.tur} • Taban: <span className="font-semibold text-primary">{school.puan.toFixed(2)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-5 pb-5">
+            <button onClick={() => setShowHedefOkulModal(false)}
+              className="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors">
+              Kapat
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* Düzenle Modal */}
     {editingDeneme && (
