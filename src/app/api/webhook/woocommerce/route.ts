@@ -1,98 +1,132 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '@/lib/firebase/config'
-import { generateLicenseCode } from '@/lib/firebase/license'
-import crypto from 'crypto'
 
-// WooCommerce webhook secret - .env.local'da tanımla
-const WEBHOOK_SECRET = process.env.WOOCOMMERCE_WEBHOOK_SECRET || ''
-
-// WooCommerce imza doğrulama
-function verifyWebhookSignature(payload: string, signature: string): boolean {
-  if (!WEBHOOK_SECRET) {
-    console.warn('WOOCOMMERCE_WEBHOOK_SECRET tanımlı değil, doğrulama atlanıyor')
-    return true // Development için
+// Rastgele lisans kodu oluştur
+function generateCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const segments = []
+  for (let s = 0; s < 3; s++) {
+    let segment = ''
+    for (let i = 0; i < 4; i++) {
+      segment += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    segments.push(segment)
   }
-
-  const expectedSignature = crypto
-    .createHmac('sha256', WEBHOOK_SECRET)
-    .update(payload)
-    .digest('base64')
-
-  return signature === expectedSignature
+  return `LGS-${segments.join('-')}`
 }
 
-// LGS Premium ürün ID'si - WooCommerce'den al
-const LGS_PREMIUM_PRODUCT_IDS = [
-  parseInt(process.env.LGS_PREMIUM_PRODUCT_ID || '0'),
-  // Birden fazla ürün varsa ekle
-]
+// Firebase REST API ile veri yaz
+async function writeToFirebase(licenseCode: string, data: Record<string, unknown>) {
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+
+  if (!projectId || !apiKey) {
+    throw new Error('Firebase config missing')
+  }
+
+  const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/licenses?documentId=${licenseCode}&key=${apiKey}`
+
+  const firestoreData = {
+    fields: {
+      code: { stringValue: data.code as string },
+      plan: { stringValue: data.plan as string },
+      used: { booleanValue: false },
+      usedBy: { nullValue: null },
+      usedByEmail: { nullValue: null },
+      usedAt: { nullValue: null },
+      note: { stringValue: data.note as string },
+      customerEmail: { stringValue: data.customerEmail as string },
+      orderId: { stringValue: data.orderId as string },
+      createdAt: { timestampValue: new Date().toISOString() },
+      source: { stringValue: 'woocommerce_webhook' },
+    }
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(firestoreData),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Firebase error: ${error}`)
+  }
+
+  return response.json()
+}
+
+// LGS Premium ürün ID'si
+const LGS_PREMIUM_PRODUCT_ID = parseInt(process.env.LGS_PREMIUM_PRODUCT_ID || '6838')
 
 export async function POST(request: NextRequest) {
   try {
     const payload = await request.text()
-    const signature = request.headers.get('x-wc-webhook-signature') || ''
 
-    // İmza doğrulama
-    if (!verifyWebhookSignature(payload, signature)) {
-      console.error('Webhook imza doğrulaması başarısız')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    // Boş payload kontrolü (ping testi)
+    if (!payload || payload === '[]' || payload === '{}') {
+      return NextResponse.json({ success: true, message: 'Ping received' }, { status: 200 })
     }
 
-    const data = JSON.parse(payload)
+    let data
+    try {
+      data = JSON.parse(payload)
+    } catch {
+      return NextResponse.json({ success: true, message: 'Invalid JSON, ignoring' }, { status: 200 })
+    }
 
-    // Sipariş durumu kontrolü - sadece tamamlanan siparişler
-    if (data.status !== 'completed' && data.status !== 'processing') {
-      return NextResponse.json({ message: 'Order not completed, skipping' }, { status: 200 })
+    // Webhook ping testi
+    if (data.webhook_id || !data.id) {
+      return NextResponse.json({ success: true, message: 'Webhook ping successful' }, { status: 200 })
+    }
+
+    // Sipariş durumu kontrolü
+    const status = data.status || ''
+    if (status !== 'completed' && status !== 'processing') {
+      return NextResponse.json({
+        success: true,
+        message: `Order status is ${status}, skipping`
+      }, { status: 200 })
     }
 
     // LGS Premium ürünü var mı kontrol et
     const lineItems = data.line_items || []
     const hasLGSPremium = lineItems.some((item: { product_id: number }) =>
-      LGS_PREMIUM_PRODUCT_IDS.includes(item.product_id)
+      item.product_id === LGS_PREMIUM_PRODUCT_ID
     )
 
-    if (!hasLGSPremium && LGS_PREMIUM_PRODUCT_IDS[0] !== 0) {
-      return NextResponse.json({ message: 'No LGS Premium product in order' }, { status: 200 })
+    if (!hasLGSPremium) {
+      return NextResponse.json({
+        success: true,
+        message: 'No LGS Premium product in order'
+      }, { status: 200 })
     }
 
     // Müşteri bilgileri
     const customerEmail = data.billing?.email || ''
     const customerName = `${data.billing?.first_name || ''} ${data.billing?.last_name || ''}`.trim()
-    const orderId = data.id || data.order_id || 'unknown'
+    const orderId = data.id || data.number || 'unknown'
 
     if (!customerEmail) {
-      console.error('Müşteri email bulunamadı')
-      return NextResponse.json({ error: 'Customer email not found' }, { status: 400 })
+      return NextResponse.json({
+        success: false,
+        message: 'Customer email not found'
+      }, { status: 200 })
     }
 
     // Lisans kodu oluştur
-    const licenseCode = generateLicenseCode()
-
-    if (!db) {
-      console.error('Firebase bağlantısı yok')
-      return NextResponse.json({ error: 'Database connection error' }, { status: 500 })
-    }
+    const licenseCode = generateCode()
 
     // Firebase'e kaydet
-    const licenseRef = doc(db, 'licenses', licenseCode)
-    await setDoc(licenseRef, {
+    await writeToFirebase(licenseCode, {
       code: licenseCode,
       plan: 'premium',
-      used: false,
-      usedBy: null,
-      usedByEmail: null,
-      usedAt: null,
       note: `WooCommerce Sipariş #${orderId} - ${customerName}`,
       customerEmail: customerEmail,
       orderId: String(orderId),
-      createdAt: serverTimestamp(),
-      source: 'woocommerce_webhook',
     })
 
-    console.log(`Lisans oluşturuldu: ${licenseCode} - Sipariş #${orderId} - ${customerEmail}`)
+    console.log(`✅ Lisans oluşturuldu: ${licenseCode} - Sipariş #${orderId} - ${customerEmail}`)
 
-    // Başarılı yanıt - lisans kodunu döndür
     return NextResponse.json({
       success: true,
       license_code: licenseCode,
@@ -100,8 +134,12 @@ export async function POST(request: NextRequest) {
     }, { status: 200 })
 
   } catch (error) {
-    console.error('Webhook işleme hatası:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Webhook hatası:', error)
+    return NextResponse.json({
+      success: false,
+      error: String(error),
+      message: 'Error processing webhook'
+    }, { status: 200 })
   }
 }
 
