@@ -415,6 +415,11 @@ export default function KarneEklePage() {
     const konular: KonuAnalizi[] = []
     const konuMap = new Map<string, { dogru: number, yanlis: number }>()
 
+    console.log('=== parseKonuAnaliziDCOCSN başladı ===')
+    console.log('dersKey:', dersKey)
+    console.log('text uzunluğu:', text.length)
+    console.log('text sample (500 char):', text.substring(0, 500))
+
     // Ders başlıklarını tanımla
     const dersBaslikMap: Record<string, string[]> = {
       turkce: ['TÜRKÇE 8.SINIF', 'TÜRKÇE'],
@@ -455,26 +460,49 @@ export default function KarneEklePage() {
     }
 
     console.log(`${dersKey} ders bölümü bulundu, uzunluk: ${dersSection.length}`)
+    console.log('dersSection sample:', dersSection.substring(0, 300))
 
-    // "# KONU_ADI ... + veya -" formatını parse et
-    // Regex: satır numarası + konu adı + harfler (DC, ÖC) + sonuç (+/-)
-    const konuPattern = /(\d+)\s+([A-ZÇĞİÖŞÜa-zçğıöşü\s.,'()]+?)\s+([A-D])\s+([A-D])\s+([+-])/g
+    // Birden fazla regex pattern dene
+    const patterns = [
+      // Pattern 1: Standart format - numara + konu + DC + ÖC + SN
+      /(\d+)\s+([A-ZÇĞİÖŞÜa-zçğıöşü\s.,'():&\-]+?)\s+([A-D])\s+([A-D]?)\s*([+-])/g,
+      // Pattern 2: Daha esnek - herhangi bir karakter konu adında
+      /(\d+)\s+(.+?)\s+([A-D])\s+([A-D]?)\s*([+-])/g,
+      // Pattern 3: Satır bazlı - her satırda bir soru
+      /^(\d+)\s+(.+?)\s+([A-D])\s+([A-D]?)\s*([+-])\s*$/gm,
+    ]
 
-    let match
-    while ((match = konuPattern.exec(dersSection)) !== null) {
-      const konuAdi = match[2].trim()
-      const sonuc = match[5] // + veya -
+    for (const pattern of patterns) {
+      let match
+      let matchCount = 0
 
-      if (!konuMap.has(konuAdi)) {
-        konuMap.set(konuAdi, { dogru: 0, yanlis: 0 })
+      while ((match = pattern.exec(dersSection)) !== null) {
+        matchCount++
+        const konuAdi = match[2].trim()
+          .replace(/\s+/g, ' ') // Fazla boşlukları temizle
+          .replace(/\.{2,}/g, '') // ... işaretlerini kaldır
+          .trim()
+        const sonuc = match[5] // + veya -
+
+        // Konu adı çok kısa veya geçersizse atla
+        if (konuAdi.length < 3 || /^[A-D\s]+$/.test(konuAdi)) continue
+
+        if (!konuMap.has(konuAdi)) {
+          konuMap.set(konuAdi, { dogru: 0, yanlis: 0 })
+        }
+
+        const konu = konuMap.get(konuAdi)!
+        if (sonuc === '+') {
+          konu.dogru++
+        } else if (sonuc === '-') {
+          konu.yanlis++
+        }
       }
 
-      const konu = konuMap.get(konuAdi)!
-      if (sonuc === '+') {
-        konu.dogru++
-      } else if (sonuc === '-') {
-        konu.yanlis++
-      }
+      console.log(`Pattern ${patterns.indexOf(pattern) + 1} ile ${matchCount} eşleşme bulundu`)
+
+      // Eğer bu pattern ile sonuç bulduysan, devam etme
+      if (konuMap.size > 0) break
     }
 
     // Map'i KonuAnalizi dizisine dönüştür
