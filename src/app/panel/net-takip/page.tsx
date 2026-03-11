@@ -524,7 +524,7 @@ export default function NetTakipPage() {
     )
   }
 
-  if (!isPremium) return <NetTakipTeaser />
+  // Net Takip artık tüm kullanıcılara açık (ücretsiz kullanıcılar 5 deneme girebiliyor)
 
   // ─── Global filter (affects both chart and table) ─────────────────────────
   const yayinlar = Array.from(new Set(denemeler.map(d => d.yayinAdi))).sort()
