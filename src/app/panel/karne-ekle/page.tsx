@@ -717,7 +717,7 @@ export default function KarneEklePage() {
               ))}
             </div>
             <div className="rounded-xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 border border-primary/20 p-5">
-              <div className="text-2xl font-bold text-foreground mb-1">99₺ <span className="text-sm font-normal text-muted-foreground">/ ay</span></div>
+              <div className="text-2xl font-bold text-foreground mb-1"><span className="text-sm font-normal text-muted-foreground line-through mr-1">499₺</span> 299₺</div>
               <Link
                 href="/premium"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors w-full justify-center"

@@ -369,8 +369,8 @@ function PremiumTeaser() {
         <p className="text-xs text-muted-foreground mb-4">Tüm premium özelliklere sınırsız eriş</p>
         <div className="flex items-center justify-center gap-4">
           <div>
-            <span className="text-2xl font-bold text-foreground">99₺</span>
-            <span className="text-sm text-muted-foreground"> / ay</span>
+            <span className="text-sm text-muted-foreground line-through mr-1">499₺</span>
+            <span className="text-2xl font-bold text-foreground">299₺</span>
           </div>
           <Link
             href="/premium"

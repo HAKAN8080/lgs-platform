@@ -291,22 +291,28 @@ export default function Home() {
             <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
               Premium
             </span>
-            <h2 className="mt-4 text-3xl font-bold text-foreground">Sınırsız AI Koç</h2>
+            <h2 className="mt-4 text-3xl font-bold text-foreground">LGS 2026&apos;ya Kadar Sınırsız Erişim</h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Yapay zeka destekli kişisel koçun ile LGS&apos;ye en iyi şekilde hazırlan. Soru sor, analiz al, plan yap.
+              Sınırsız deneme girişi, detaylı net takip, kişiselleştirilmiş strateji ve daha fazlası. Tek seferlik ödeme, abonelik yok.
             </p>
             <div className="mt-8 flex items-center justify-center gap-6">
-              <div>
-                <div className="text-3xl font-bold text-foreground">99₺</div>
-                <div className="text-sm text-muted-foreground">/ ay</div>
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-lg text-muted-foreground line-through">499₺</span>
+                  <span className="text-3xl font-bold text-foreground">299₺</span>
+                </div>
+                <div className="text-sm text-muted-foreground">tek seferlik</div>
               </div>
               <Link
                 href="/premium"
                 className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Premium&apos;a Geç
+                Hemen Al
               </Link>
             </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              LGS 2026 (Haziran) tarihine kadar geçerli • 1.092.206+ öğrenci arasında fark yarat
+            </p>
           </div>
         </div>
       </section>
