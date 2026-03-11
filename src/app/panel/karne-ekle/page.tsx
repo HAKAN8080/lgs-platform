@@ -125,13 +125,55 @@ export default function KarneEklePage() {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i)
         const textContent = await page.getTextContent()
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ')
-        fullText += pageText + '\n'
+
+        // Metin öğelerini pozisyona göre sırala (y sonra x)
+        const items = textContent.items
+          .filter((item: any) => item.str && item.str.trim())
+          .map((item: any) => ({
+            str: item.str,
+            // transform[5] = y koordinatı (yukarıdan aşağı), transform[4] = x koordinatı
+            y: Math.round(item.transform[5]),
+            x: Math.round(item.transform[4])
+          }))
+          .sort((a: any, b: any) => {
+            // Önce y'ye göre (yukarıdan aşağı - büyükten küçüğe)
+            if (Math.abs(a.y - b.y) > 5) return b.y - a.y
+            // Aynı satırda ise x'e göre (soldan sağa)
+            return a.x - b.x
+          })
+
+        // Satır bazlı birleştir
+        let lastY = items[0]?.y || 0
+        let pageText = ''
+
+        for (const item of items) {
+          // Yeni satır mı?
+          if (Math.abs(item.y - lastY) > 5) {
+            pageText += '\n'
+            lastY = item.y
+          }
+          pageText += item.str + ' '
+        }
+
+        console.log(`Page ${i} text length:`, pageText.length)
+        console.log(`Page ${i} sample:`, pageText.substring(0, 200))
+
+        fullText += pageText + '\n\n=== PAGE BREAK ===\n\n'
       }
 
-      console.log('PDF text extracted, length:', fullText.length)
+      console.log('PDF text extracted, total length:', fullText.length)
+
+      // KONU ANALİZİ var mı kontrol et
+      if (fullText.includes('KONU ANALİZİ')) {
+        console.log('✓ KONU ANALİZİ bölümü bulundu!')
+      } else {
+        console.log('✗ KONU ANALİZİ bölümü bulunamadı')
+      }
+
+      if (fullText.includes('DC ÖC SN') || fullText.includes('DC  ÖC  SN')) {
+        console.log('✓ DC ÖC SN başlığı bulundu!')
+      }
+
       return fullText
     } catch (err) {
       console.error('PDF extraction error:', err)
