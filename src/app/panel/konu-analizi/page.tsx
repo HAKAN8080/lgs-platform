@@ -221,35 +221,36 @@ export default function KonuAnaliziPage() {
       })
     })
 
-    // Ders bazında grupla
+    // Ders bazında grupla - önce tüm dersleri oluştur (konu olsun olmasın)
     const dersMap = new Map<string, DersAnaliz>()
 
-    Array.from(konuMap.values()).forEach(konuPerf => {
+    // Önce dersStatsMap'ten tüm dersleri oluştur
+    Array.from(dersStatsMap.entries()).forEach(([dersKey, dersStats]) => {
       const dersInfo = LGS_QUESTION_DISTRIBUTION.find(d => {
         const dersName = d.subject.toLowerCase().replace(/\s+/g, '')
-        const key = konuPerf.ders.toLowerCase().replace(/\s+/g, '')
-        return dersName.includes(key) || key.includes(dersName.substring(0, 3))
+        const normalizedKey = dersKey.toLowerCase().replace(/\s+/g, '')
+        return dersName.includes(normalizedKey) || normalizedKey.includes(dersName.substring(0, 3))
       })
 
-      const dersKey = konuPerf.ders
-      const dersStats = dersStatsMap.get(dersKey) || { dogru: 0, yanlis: 0, soru: 0 }
+      dersMap.set(dersKey, {
+        ders: dersInfo?.subject || dersKey,
+        dersKey: dersKey,
+        icon: dersInfo?.icon || '📚',
+        color: dersInfo?.color || '#888888',
+        toplamDeneme: filteredDenemeler.length,
+        toplamDogru: dersStats.dogru,
+        toplamYanlis: dersStats.yanlis,
+        toplamSoru: dersStats.soru,
+        genelBasari: dersStats.soru > 0 ? (dersStats.dogru / dersStats.soru) * 100 : 0,
+        konular: []
+      })
+    })
 
-      if (!dersMap.has(dersKey)) {
-        dersMap.set(dersKey, {
-          ders: dersInfo?.subject || konuPerf.ders,
-          dersKey: dersKey,
-          icon: dersInfo?.icon || '📚',
-          color: dersInfo?.color || '#888888',
-          toplamDeneme: filteredDenemeler.length,
-          toplamDogru: dersStats.dogru,
-          toplamYanlis: dersStats.yanlis,
-          toplamSoru: dersStats.soru,
-          genelBasari: dersStats.soru > 0 ? (dersStats.dogru / dersStats.soru) * 100 : 0,
-          konular: []
-        })
+    // Sonra konu detaylarını ekle (varsa)
+    Array.from(konuMap.values()).forEach(konuPerf => {
+      if (dersMap.has(konuPerf.ders)) {
+        dersMap.get(konuPerf.ders)!.konular.push(konuPerf)
       }
-
-      dersMap.get(dersKey)!.konular.push(konuPerf)
     })
 
     // Her dersin konularını başarı yüzdesine göre sırala (en düşük önce)
