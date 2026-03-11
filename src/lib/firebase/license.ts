@@ -1,5 +1,8 @@
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, getDocs, collection, query, orderBy, serverTimestamp } from 'firebase/firestore'
 import { db } from './config'
+
+// Admin email listesi
+export const ADMIN_EMAILS = ['admin@thorius.com.tr']
 
 export interface License {
   code: string
@@ -10,6 +13,7 @@ export interface License {
   usedAt: Date | null
   createdAt: Date
   expiresAt?: Date | null // null = LGS'ye kadar geçerli
+  note?: string | null
 }
 
 export interface ActivationResult {
@@ -114,4 +118,83 @@ export async function checkUserLicense(userId: string): Promise<{
     console.error('Lisans kontrol hatası:', error)
     return { hasPremium: false, plan: null, licenseCode: null }
   }
+}
+
+/**
+ * Rastgele lisans kodu oluştur
+ */
+export function generateLicenseCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Karışıklık olmaması için 0,O,1,I hariç
+  const segments = []
+  for (let s = 0; s < 3; s++) {
+    let segment = ''
+    for (let i = 0; i < 4; i++) {
+      segment += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    segments.push(segment)
+  }
+  return `LGS-${segments.join('-')}`
+}
+
+/**
+ * Yeni lisans kodu oluştur ve kaydet (Admin)
+ */
+export async function createLicense(
+  plan: 'premium' | 'premium_plus' = 'premium',
+  note?: string
+): Promise<{ success: boolean; code?: string; message: string }> {
+  if (!db) {
+    return { success: false, message: 'Veritabanı bağlantısı kurulamadı' }
+  }
+
+  try {
+    const code = generateLicenseCode()
+    const licenseRef = doc(db, 'licenses', code)
+
+    await setDoc(licenseRef, {
+      code,
+      plan,
+      used: false,
+      usedBy: null,
+      usedByEmail: null,
+      usedAt: null,
+      note: note || null,
+      createdAt: serverTimestamp(),
+    })
+
+    return { success: true, code, message: 'Lisans kodu oluşturuldu' }
+  } catch (error) {
+    console.error('Lisans oluşturma hatası:', error)
+    return { success: false, message: 'Lisans oluşturulamadı' }
+  }
+}
+
+/**
+ * Tüm lisansları getir (Admin)
+ */
+export async function getAllLicenses(): Promise<License[]> {
+  if (!db) return []
+
+  try {
+    const licensesRef = collection(db, 'licenses')
+    const q = query(licensesRef, orderBy('createdAt', 'desc'))
+    const snapshot = await getDocs(q)
+
+    return snapshot.docs.map(doc => ({
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+      usedAt: doc.data().usedAt?.toDate?.() || null,
+    })) as License[]
+  } catch (error) {
+    console.error('Lisansları getirme hatası:', error)
+    return []
+  }
+}
+
+/**
+ * Admin mi kontrol et
+ */
+export function isAdmin(email: string | null): boolean {
+  if (!email) return false
+  return ADMIN_EMAILS.includes(email.toLowerCase())
 }
