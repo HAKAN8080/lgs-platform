@@ -141,6 +141,11 @@ export default function KarneEklePage() {
 
   // Formatı tespit et
   const detectFormat = (text: string): 'form_akademi' | 'ucdortbes' | 'hiz' | 'unknown' => {
+    // HIZ / Paraf formatı: "DC ÖC SN" ile konu analizi var
+    // Bu format öncelikli çünkü konu bazlı detay içeriyor
+    if (text.includes('DC ÖC SN') || (text.includes('KONU ANALİZİ') && text.includes('KONULAR'))) {
+      return 'hiz'
+    }
     // Form Akademi: Tablo formatı + "DERSLERE VE KONULARA GÖRE" + "SORU SAYISI" + "DOĞRU CEVAP"
     if ((text.includes('DERSLERE VE KONULARA GÖRE SINAV ANALİZİ') || text.includes('FORM AKADEMİ')) &&
         text.includes('SORU SAYISI') && text.includes('DOĞRU CEVAP')) {
@@ -151,9 +156,6 @@ export default function KarneEklePage() {
     }
     if (text.includes('ÜÇDÖRTBEŞ') || text.includes('345')) {
       return 'ucdortbes'
-    }
-    if (text.includes('DC ÖC SN') || text.includes('KONU ANALİZİ')) {
-      return 'hiz'
     }
     return 'unknown'
   }
@@ -407,8 +409,103 @@ export default function KarneEklePage() {
     return new Date().toISOString().split('T')[0]
   }
 
+  // "DC ÖC SN" formatındaki konu analizini parse et
+  // Format: "1 MEVSİMLERİN OLUŞUMU D D +" veya "1 MEVSİMLERİN OLUŞUMU D A -"
+  const parseKonuAnaliziDCOCSN = (text: string, dersKey: string): KonuAnalizi[] => {
+    const konular: KonuAnalizi[] = []
+    const konuMap = new Map<string, { dogru: number, yanlis: number }>()
+
+    // Ders başlıklarını tanımla
+    const dersBaslikMap: Record<string, string[]> = {
+      turkce: ['TÜRKÇE 8.SINIF', 'TÜRKÇE'],
+      matematik: ['MATEMATİK 8.SINIF', 'MATEMATİK'],
+      fen: ['FEN BİLİMLERİ 8.SINIF', 'FEN BİLİMLERİ', 'FEN'],
+      inkilap: ['İNK. TARİHİ VE ATATÜRKÇÜLÜK', 'İNKILAP', 'TARİH'],
+      din: ['DİN KÜLTÜRÜ 8.SINIF', 'DİN KÜLTÜRÜ', 'DİN'],
+      ingilizce: ['İNGİLİZCE 8.SINIF', 'İNGİLİZCE'],
+    }
+
+    const basliklar = dersBaslikMap[dersKey] || []
+
+    // Ders bölümünü bul
+    let dersSection = ''
+    for (const baslik of basliklar) {
+      const baslikIndex = text.indexOf(baslik)
+      if (baslikIndex !== -1) {
+        // Sonraki ders başlığına veya metnin sonuna kadar al
+        const nextDersPatterns = ['TÜRKÇE', 'MATEMATİK', 'FEN BİLİMLERİ', 'İNK.', 'DİN KÜLTÜRÜ', 'İNGİLİZCE']
+        let endIndex = text.length
+
+        for (const nextDers of nextDersPatterns) {
+          if (baslik.includes(nextDers)) continue // Kendi başlığını atla
+          const nextIndex = text.indexOf(nextDers, baslikIndex + baslik.length)
+          if (nextIndex !== -1 && nextIndex < endIndex) {
+            endIndex = nextIndex
+          }
+        }
+
+        dersSection = text.substring(baslikIndex, endIndex)
+        break
+      }
+    }
+
+    if (!dersSection) {
+      console.log(`Ders bölümü bulunamadı: ${dersKey}`)
+      return []
+    }
+
+    console.log(`${dersKey} ders bölümü bulundu, uzunluk: ${dersSection.length}`)
+
+    // "# KONU_ADI ... + veya -" formatını parse et
+    // Regex: satır numarası + konu adı + harfler (DC, ÖC) + sonuç (+/-)
+    const konuPattern = /(\d+)\s+([A-ZÇĞİÖŞÜa-zçğıöşü\s.,'()]+?)\s+([A-D])\s+([A-D])\s+([+-])/g
+
+    let match
+    while ((match = konuPattern.exec(dersSection)) !== null) {
+      const konuAdi = match[2].trim()
+      const sonuc = match[5] // + veya -
+
+      if (!konuMap.has(konuAdi)) {
+        konuMap.set(konuAdi, { dogru: 0, yanlis: 0 })
+      }
+
+      const konu = konuMap.get(konuAdi)!
+      if (sonuc === '+') {
+        konu.dogru++
+      } else if (sonuc === '-') {
+        konu.yanlis++
+      }
+    }
+
+    // Map'i KonuAnalizi dizisine dönüştür
+    konuMap.forEach((stats, konuAdi) => {
+      const soruSayisi = stats.dogru + stats.yanlis
+      if (soruSayisi > 0) {
+        konular.push({
+          konu: konuAdi,
+          soruSayisi,
+          dogru: stats.dogru,
+          yanlis: stats.yanlis,
+          basariYuzdesi: (stats.dogru / soruSayisi) * 100
+        })
+      }
+    })
+
+    console.log(`${dersKey} için ${konular.length} konu bulundu:`, konular)
+    return konular
+  }
+
   // Konu bazında parsing yap
   const parseKonularFromText = (text: string, dersKey: string): KonuAnalizi[] => {
+    // Önce DC ÖC SN formatını dene (HIZ, Paraf vs.)
+    if (text.includes('DC ÖC SN') || text.includes('KONU ANALİZİ')) {
+      const dcKonular = parseKonuAnaliziDCOCSN(text, dersKey)
+      if (dcKonular.length > 0) {
+        return dcKonular
+      }
+    }
+
+    // Fallback: LGS_QUESTION_DISTRIBUTION'dan konu isimleri ile eşleştir
     const subjectName = DERS_TO_SUBJECT_MAP[dersKey]
     const subjectData = LGS_QUESTION_DISTRIBUTION.find(s => s.subject === subjectName)
     if (!subjectData) return []
