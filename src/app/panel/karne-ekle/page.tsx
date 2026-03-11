@@ -462,6 +462,18 @@ export default function KarneEklePage() {
     console.log('text uzunluğu:', text.length)
     console.log('text sample (500 char):', text.substring(0, 500))
 
+    // KONU ANALİZİ bölümünü bul (2. sayfada)
+    const konuAnaliziIndex = text.indexOf('KONU ANALİZİ')
+    if (konuAnaliziIndex === -1) {
+      console.log('KONU ANALİZİ bölümü bulunamadı')
+      return []
+    }
+
+    // KONU ANALİZİ'den sonraki text'i al
+    const konuAnaliziText = text.substring(konuAnaliziIndex)
+    console.log('KONU ANALİZİ bölümü bulundu, uzunluk:', konuAnaliziText.length)
+    console.log('KONU ANALİZİ sample:', konuAnaliziText.substring(0, 500))
+
     // Ders başlıklarını tanımla
     const dersBaslikMap: Record<string, string[]> = {
       turkce: ['TÜRKÇE 8.SINIF', 'TÜRKÇE'],
@@ -474,30 +486,30 @@ export default function KarneEklePage() {
 
     const basliklar = dersBaslikMap[dersKey] || []
 
-    // Ders bölümünü bul
+    // KONU ANALİZİ bölümü içinde ders bölümünü bul
     let dersSection = ''
     for (const baslik of basliklar) {
-      const baslikIndex = text.indexOf(baslik)
+      const baslikIndex = konuAnaliziText.indexOf(baslik)
       if (baslikIndex !== -1) {
         // Sonraki ders başlığına veya metnin sonuna kadar al
-        const nextDersPatterns = ['TÜRKÇE', 'MATEMATİK', 'FEN BİLİMLERİ', 'İNK.', 'DİN KÜLTÜRÜ', 'İNGİLİZCE']
-        let endIndex = text.length
+        const nextDersPatterns = ['TÜRKÇE 8', 'MATEMATİK 8', 'FEN BİLİMLERİ 8', 'İNK. TARİHİ', 'DİN KÜLTÜRÜ 8', 'İNGİLİZCE 8']
+        let endIndex = konuAnaliziText.length
 
         for (const nextDers of nextDersPatterns) {
-          if (baslik.includes(nextDers)) continue // Kendi başlığını atla
-          const nextIndex = text.indexOf(nextDers, baslikIndex + baslik.length)
+          if (baslik.includes(nextDers.split(' ')[0])) continue // Kendi başlığını atla
+          const nextIndex = konuAnaliziText.indexOf(nextDers, baslikIndex + baslik.length)
           if (nextIndex !== -1 && nextIndex < endIndex) {
             endIndex = nextIndex
           }
         }
 
-        dersSection = text.substring(baslikIndex, endIndex)
+        dersSection = konuAnaliziText.substring(baslikIndex, endIndex)
         break
       }
     }
 
     if (!dersSection) {
-      console.log(`Ders bölümü bulunamadı: ${dersKey}`)
+      console.log(`Ders bölümü bulunamadı (KONU ANALİZİ içinde): ${dersKey}`)
       return []
     }
 
