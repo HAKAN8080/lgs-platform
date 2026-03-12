@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /panel/
+Disallow: /giris
+Disallow: /kayit
+
+Sitemap: https://lgs.thorius.com.tr/sitemap.xml
