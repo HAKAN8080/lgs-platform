@@ -3,549 +3,345 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LGS Soru Üreticisi</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>LGS Soru Üreticisi — Yakında</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0f1117;
-  --bg2: #181c27;
-  --bg3: #1e2333;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --text: #e8eaf0;
-  --text2: #8b91a8;
-  --text3: #555d7a;
-  --blue: #4f7cff;
-  --blue-bg: rgba(79,124,255,0.12);
-  --blue-border: rgba(79,124,255,0.3);
-  --green: #3ecf8e;
-  --green-bg: rgba(62,207,142,0.12);
-  --green-border: rgba(62,207,142,0.3);
-  --red: #f05252;
-  --red-bg: rgba(240,82,82,0.12);
-  --red-border: rgba(240,82,82,0.3);
-  --yellow: #f5a623;
-  --yellow-bg: rgba(245,166,35,0.1);
-  --yellow-border: rgba(245,166,35,0.3);
-  --radius: 10px;
-  --radius-sm: 6px;
-}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: 'IBM Plex Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+  color: #e8eaf0;
   min-height: 100vh;
-  font-size: 14px;
-}
-.layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-
-/* SIDEBAR */
-.sidebar {
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  padding: 20px 0;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
-.logo {
-  padding: 0 20px 20px;
-  border-bottom: 1px solid var(--border);
+
+.container {
+  text-align: center;
+  max-width: 600px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 166, 35, 0.15);
+  border: 1px solid rgba(245, 166, 35, 0.3);
+  color: #f5a623;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 32px;
+}
+
+.icon-wrap {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 32px;
+  position: relative;
+}
+
+.icon-bg {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(79, 124, 255, 0.2), rgba(168, 85, 247, 0.2));
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.icon-bg svg {
+  width: 56px;
+  height: 56px;
+  stroke: #a855f7;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.construction-bars {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+}
+
+.bar {
+  width: 8px;
+  height: 24px;
+  background: linear-gradient(180deg, #f5a623 50%, #1a1a2e 50%);
+  background-size: 100% 8px;
+  border-radius: 2px;
+  animation: loading 1s ease-in-out infinite;
+}
+
+.bar:nth-child(2) { animation-delay: 0.1s; }
+.bar:nth-child(3) { animation-delay: 0.2s; }
+.bar:nth-child(4) { animation-delay: 0.3s; }
+.bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes loading {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff, #a0a0c0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #8b91a8;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+}
+
+.feature-icon {
+  font-size: 24px;
   margin-bottom: 12px;
 }
-.logo-title { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
-.logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.nav-section { padding: 4px 12px; margin-bottom: 2px; }
-.nav-label { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 4px; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px; border-radius: var(--radius-sm);
-  cursor: pointer; color: var(--text2); font-size: 13px;
-  transition: all 0.12s; border: 1px solid transparent;
+
+.feature-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8eaf0;
+  margin-bottom: 6px;
 }
-.nav-item:hover { background: var(--bg3); color: var(--text); }
-.nav-item.active { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
-.nav-icon { font-size: 14px; width: 18px; text-align: center; }
 
-/* MAIN */
-.main { padding: 28px 32px; overflow-y: auto; }
-.page { display: none; }
-.page.active { display: block; }
-.page-header { margin-bottom: 24px; }
-.page-title { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -0.4px; }
-.page-desc { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.6; }
-
-/* CARDS */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
+.feature-desc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
 }
-.card-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
 
-/* UPLOAD */
-.upload-zone {
-  border: 1px dashed var(--border2);
-  border-radius: var(--radius);
-  padding: 32px;
-  text-align: center;
+.notify-form {
+  display: flex;
+  gap: 10px;
+  max-width: 400px;
+  margin: 0 auto 24px;
+}
+
+.notify-form input {
+  flex: 1;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0 16px;
+  color: #e8eaf0;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.notify-form input:focus {
+  outline: none;
+  border-color: #4f7cff;
+}
+
+.notify-form input::placeholder {
+  color: #555;
+}
+
+.notify-form button {
+  height: 48px;
+  padding: 0 24px;
+  background: linear-gradient(135deg, #4f7cff, #a855f7);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
-  background: var(--bg3);
+  transition: transform 0.2s, opacity 0.2s;
+  font-family: inherit;
 }
-.upload-zone:hover { border-color: var(--blue); background: var(--blue-bg); }
-.upload-zone.drag { border-color: var(--blue); background: var(--blue-bg); }
-.upload-ico { font-size: 28px; opacity: 0.4; margin-bottom: 8px; }
-.upload-main { font-size: 14px; color: var(--text); margin-bottom: 4px; }
-.upload-sub { font-size: 12px; color: var(--text3); }
 
-.file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-.file-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; background: var(--bg3);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
+.notify-form button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
 }
-.file-ext {
-  width: 32px; height: 32px; border-radius: 6px;
-  background: var(--blue-bg); border: 1px solid var(--blue-border);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 600; color: var(--blue); flex-shrink: 0;
-}
-.file-name { flex: 1; font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-meta { font-size: 11px; color: var(--text3); }
-.chip {
-  display: inline-flex; align-items: center;
-  font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px;
-  border: 1px solid transparent;
-}
-.chip-blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
-.chip-green { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
-.chip-yellow { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow-border); }
-.chip-gray { background: var(--bg3); color: var(--text2); border-color: var(--border); }
 
-/* CONTROLS */
-.ctrl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.ctrl-label { font-size: 11px; color: var(--text3); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-select {
-  width: 100%; height: 38px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border2); background: var(--bg3);
-  color: var(--text); font-size: 13px; font-family: inherit;
-  padding: 0 10px; cursor: pointer; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b91a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 10px center;
+.back-link {
+  color: #6b7280;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
 }
-select:focus { outline: none; border-color: var(--blue); }
-.btn-row { display: flex; gap: 8px; }
-button {
-  height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border2);
-  background: var(--bg3); color: var(--text); font-size: 13px; font-family: inherit;
-  font-weight: 500; cursor: pointer; padding: 0 18px; transition: all 0.12s; flex: 1;
-}
-button:hover { background: var(--bg2); border-color: var(--border2); }
-button.btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
-button.btn-primary:hover { opacity: 0.88; }
-button:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* QUESTION CARD */
-.q-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; margin-top: 16px;
+.back-link:hover {
+  color: #a855f7;
 }
-.q-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.q-text { font-size: 15px; line-height: 1.8; color: var(--text); margin-bottom: 16px; }
-.q-visual {
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;
-  font-size: 13px; color: var(--text2); line-height: 1.7;
-  font-family: 'IBM Plex Mono', monospace;
-}
-.q-visual svg { display: block; margin: 8px auto 0; }
-.opts { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
-.opt {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 11px 14px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border); cursor: pointer;
-  font-size: 14px; color: var(--text); line-height: 1.55;
-  transition: all 0.1s;
-}
-.opt:hover { background: var(--bg3); border-color: var(--border2); }
-.opt.correct { background: var(--green-bg) !important; border-color: var(--green-border) !important; color: var(--green) !important; pointer-events: none; }
-.opt.wrong { background: var(--red-bg) !important; border-color: var(--red-border) !important; color: var(--red) !important; pointer-events: none; }
-.opt.locked { pointer-events: none; }
-.opt-letter {
-  width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600; color: var(--text2); flex-shrink: 0; margin-top: 1px;
-}
-.opt.correct .opt-letter { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
-.opt.wrong .opt-letter { background: var(--red-bg); border-color: var(--red-border); color: var(--red); }
-.exp {
-  background: var(--bg3); border-left: 3px solid var(--blue);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: 12px 14px; font-size: 13px; color: var(--text2); line-height: 1.7;
-  display: none; margin-top: 4px;
-}
-.exp.show { display: block; }
 
-/* LOADING / ERROR */
-.loading-box {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 40px;
-  text-align: center; margin-top: 16px;
+.progress-info {
+  margin-top: 48px;
+  padding: 20px;
+  background: rgba(79, 124, 255, 0.08);
+  border: 1px solid rgba(79, 124, 255, 0.2);
+  border-radius: 12px;
 }
-.spinner {
-  width: 24px; height: 24px;
-  border: 2px solid var(--border2); border-top-color: var(--blue);
-  border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 12px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-txt { font-size: 13px; color: var(--text2); }
-.dots::after {
-  content: ''; animation: dots 1.4s infinite;
-}
-@keyframes dots {
-  0%,20% { content: '.'; }
-  40% { content: '..'; }
-  60%,100% { content: '...'; }
-}
-.err-box {
-  background: var(--red-bg); border: 1px solid var(--red-border);
-  border-radius: var(--radius); padding: 16px 20px;
-  font-size: 13px; color: var(--red); margin-top: 16px; line-height: 1.6;
-}
-.err-box code { font-size: 11px; font-family: 'IBM Plex Mono', monospace; display: block; margin-top: 6px; opacity: 0.7; }
 
-/* BANK */
-.bank-item {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 14px 16px;
-  cursor: pointer; margin-bottom: 8px; transition: all 0.1s;
+.progress-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4f7cff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
 }
-.bank-item:hover { border-color: var(--border2); background: var(--bg3); }
-.bank-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-.bank-txt { font-size: 13px; color: var(--text2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.empty-state { padding: 48px; text-align: center; font-size: 13px; color: var(--text3); }
 
-input[type=file] { display: none; }
+.progress-bar-wrap {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(90deg, #4f7cff, #a855f7);
+  border-radius: 8px;
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% { width: 30%; }
+  50% { width: 40%; }
+  100% { width: 30%; }
+}
+
+.progress-text {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+@media (max-width: 500px) {
+  .features { grid-template-columns: 1fr; }
+  .notify-form { flex-direction: column; }
+  h1 { font-size: 24px; }
+}
 </style>
 </head>
 <body>
-<div class="layout">
-  <div class="sidebar">
-    <div class="logo">
-      <div class="logo-title">LGS Soru Üreticisi</div>
-      <div class="logo-sub">AI destekli soru bankası</div>
+<div class="container">
+  <div class="badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v6l4 2"/>
+    </svg>
+    Geliştirme Aşamasında
+  </div>
+
+  <div class="icon-wrap">
+    <div class="icon-bg">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
     </div>
-    <div class="nav-section">
-      <div class="nav-label">Menü</div>
-      <div class="nav-item active" data-page="yukle">
-        <span class="nav-icon">📁</span> Sınavları Yükle
-      </div>
-      <div class="nav-item" data-page="uret">
-        <span class="nav-icon">✨</span> Soru Üret
-      </div>
-      <div class="nav-item" data-page="bank">
-        <span class="nav-icon">📚</span> Soru Bankası
-      </div>
+    <div class="construction-bars">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
     </div>
   </div>
 
-  <div class="main">
+  <h1>AI Soru Üretici</h1>
+  <p class="subtitle">
+    MEB LGS sınav formatında, yapay zeka destekli özgün sorular üreten sistemimiz üzerinde çalışıyoruz.
+  </p>
 
-    <!-- SINAVLAR -->
-    <div class="page active" id="page-yukle">
-      <div class="page-header">
-        <div class="page-title">MEB Sınavlarını Yükle</div>
-        <div class="page-desc">Yüklediğin PDF veya görsel sınavları AI referans alarak benzer sorular üretir.</div>
-      </div>
-      <div class="card">
-        <div class="upload-zone" id="uploadZone">
-          <div class="upload-ico">📄</div>
-          <div class="upload-main">Dosya yüklemek için tıkla veya sürükle</div>
-          <div class="upload-sub">PDF · JPG · PNG · Birden fazla dosya seçilebilir</div>
-        </div>
-        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png">
-        <div class="file-list" id="uploadedList"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Demo — Yüklü Sınavlar</div>
-        <div class="file-list">
-          <div class="file-row">
-            <div class="file-ext">PDF</div>
-            <span class="file-name">LGS_2024_Tum_Dersler.pdf</span>
-            <span class="chip chip-blue">4 ders</span>
-            <span class="chip chip-gray">90 soru</span>
-          </div>
-          <div class="file-row">
-            <div class="file-ext">PDF</div>
-            <span class="file-name">LGS_2023_Matematik.pdf</span>
-            <span class="chip chip-gray">20 soru</span>
-          </div>
-          <div class="file-row">
-            <div class="file-ext">PDF</div>
-            <span class="file-name">LGS_2022_Fen_Bilimleri.pdf</span>
-            <span class="chip chip-gray">20 soru</span>
-          </div>
-          <div class="file-row">
-            <div class="file-ext">IMG</div>
-            <span class="file-name">LGS_2024_Turkce_sayfa1.jpg</span>
-            <span class="chip chip-gray">5 soru</span>
-          </div>
-        </div>
-      </div>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">MEB Formatında</div>
+      <div class="feature-desc">Gerçek LGS sınavlarıyla birebir uyumlu soru yapısı</div>
     </div>
-
-    <!-- SORU ÜRET -->
-    <div class="page" id="page-uret">
-      <div class="page-header">
-        <div class="page-title">Soru Üret</div>
-        <div class="page-desc">Ders, zorluk ve soru tipini seç. AI, MEB sınavlarının stilinde şekil ve tablo destekli soru üretir.</div>
-      </div>
-      <div class="card">
-        <div class="ctrl-grid">
-          <div>
-            <div class="ctrl-label">Ders</div>
-            <select id="sDers">
-              <option>Matematik</option>
-              <option>Türkçe</option>
-              <option>Fen Bilimleri</option>
-              <option>İnkılap Tarihi</option>
-              <option>Din Kültürü</option>
-              <option>İngilizce</option>
-            </select>
-          </div>
-          <div>
-            <div class="ctrl-label">Zorluk</div>
-            <select id="sZor">
-              <option>Kolay</option>
-              <option selected>Orta</option>
-              <option>Zor</option>
-            </select>
-          </div>
-          <div>
-            <div class="ctrl-label">Soru Tipi</div>
-            <select id="sTip">
-              <option>Standart</option>
-              <option>Grafik / Tablo</option>
-              <option>Şekil / Diyagram</option>
-              <option>Okuma Parçası</option>
-            </select>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button id="btn1">Soru Üret ↗</button>
-          <button id="btn3">3 Soru Üret ↗</button>
-          <button class="btn-primary" id="btn5">5 Soru Üret ↗</button>
-        </div>
-      </div>
-      <div id="soruArea"></div>
+    <div class="feature">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Görsel Destekli</div>
+      <div class="feature-desc">Grafik, tablo ve şekil içeren sorular</div>
     </div>
-
-    <!-- SORU BANKASI -->
-    <div class="page" id="page-bank">
-      <div class="page-header">
-        <div class="page-title">Soru Bankası</div>
-        <div class="page-desc">Üretilen tüm sorular burada birikir. Tıklayarak tekrar çözebilirsin.</div>
-      </div>
-      <div id="bankArea"><div class="empty-state">Henüz soru üretilmedi. Soru Üret sekmesinden başla.</div></div>
+    <div class="feature">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-title">6 Ders</div>
+      <div class="feature-desc">Türkçe, Matematik, Fen, Sosyal, Din, İngilizce</div>
     </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Anında Üretim</div>
+      <div class="feature-desc">Saniyeler içinde özgün sorular</div>
+    </div>
+  </div>
 
+  <form class="notify-form" onsubmit="handleNotify(event)">
+    <input type="email" id="notifyEmail" placeholder="E-posta adresiniz" required>
+    <button type="submit">Haber Ver</button>
+  </form>
+
+  <a href="/" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Ana Sayfaya Dön
+  </a>
+
+  <div class="progress-info">
+    <div class="progress-title">Geliştirme Durumu</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar"></div>
+    </div>
+    <div class="progress-text">Tahmini: Nisan 2026</div>
   </div>
 </div>
 
 <script>
-var bank = [];
-
-// NAV
-document.querySelectorAll('.nav-item').forEach(function(el) {
-  el.addEventListener('click', function() {
-    var pid = this.dataset.page;
-    document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('active'); });
-    this.classList.add('active');
-    document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-    document.getElementById('page-' + pid).classList.add('active');
-    if (pid === 'bank') renderBank();
-  });
-});
-
-// UPLOAD
-document.getElementById('uploadZone').addEventListener('click', function() {
-  document.getElementById('fileInput').click();
-});
-document.getElementById('uploadZone').addEventListener('dragover', function(e) {
-  e.preventDefault(); this.classList.add('drag');
-});
-document.getElementById('uploadZone').addEventListener('dragleave', function() {
-  this.classList.remove('drag');
-});
-document.getElementById('uploadZone').addEventListener('drop', function(e) {
-  e.preventDefault(); this.classList.remove('drag');
-  handleFiles(e.dataTransfer.files);
-});
-document.getElementById('fileInput').addEventListener('change', function() {
-  handleFiles(this.files);
-});
-function handleFiles(files) {
-  var list = document.getElementById('uploadedList');
-  Array.from(files).forEach(function(f) {
-    var ext = f.name.split('.').pop().toUpperCase();
-    var size = (f.size / 1024).toFixed(0) + ' KB';
-    var d = document.createElement('div');
-    d.className = 'file-row';
-    d.innerHTML = '<div class="file-ext">' + ext + '</div><span class="file-name">' + f.name + '</span><span class="file-meta">' + size + '</span><span class="chip chip-green">Hazır</span>';
-    list.appendChild(d);
-  });
-}
-
-// BUTTONS
-document.getElementById('btn1').addEventListener('click', function() { uret(1); });
-document.getElementById('btn3').addEventListener('click', function() { uret(3); });
-document.getElementById('btn5').addEventListener('click', function() { uret(5); });
-
-function setButtons(disabled) {
-  ['btn1','btn3','btn5'].forEach(function(id) {
-    document.getElementById(id).disabled = disabled;
-  });
-}
-
-function buildPrompt(ders, zorluk, tip) {
-  var tipMap = {
-    'Grafik / Tablo': 'tablo veya grafik iceren (tabloyu duz metin formatinda gorsel_icerik alanina yaz)',
-    'Şekil / Diyagram': 'geometrik sekil veya diyagram iceren (basit SVG kodunu svg_kod alanina yaz, viewBox="0 0 240 180", sadece stroke kullan fill="none", stroke="currentColor")',
-    'Okuma Parçası': 'kisa okuma parcasina dayanan (parcayi gorsel_icerik alanina yaz, max 4 cumle)',
-    'Standart': 'standart metin tabanli'
-  };
-  return 'LGS 2024 MEB sinavi stilinde, ' + ders + ' dersinden, ' + zorluk + ' seviyede, ' + (tipMap[tip]||'standart') + ' bir 8.sinif sorusu uret.\n' +
-    'Yaniti SADECE asagidaki JSON formatinda ver. Baska hicbir sey yazma, markdown kullanma:\n' +
-    '{"soru":"soru metni","gorsel_icerik":"tablo veya metin varsa buraya yaz yoksa bos birak","svg_kod":"sadece Sekil/Diyagram tipinde SVG element yaz digerlerinde bos string","siklar":["A) birinci secenek","B) ikinci secenek","C) ucuncu secenek","D) dorduncu secenek"],"dogru":0,"aciklama":"dogru cevap neden bu","konu":"hangi konudan"}';
-}
-
-async function callAPI(prompt) {
-  var resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  var data = await resp.json();
-  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-  var txt = data.content.filter(function(c){ return c.type === 'text'; }).map(function(c){ return c.text; }).join('');
-  txt = txt.replace(/```json/gi,'').replace(/```/g,'').trim();
-  var match = txt.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('JSON parse edilemedi: ' + txt.slice(0,80));
-  return JSON.parse(match[0]);
-}
-
-async function uret(n) {
-  var ders = document.getElementById('sDers').value;
-  var zorluk = document.getElementById('sZor').value;
-  var tip = document.getElementById('sTip').value;
-  setButtons(true);
-  var area = document.getElementById('soruArea');
-  area.innerHTML = '<div class="loading-box"><div class="spinner"></div><div class="loading-txt">' + (n > 1 ? n + ' soru üretiliyor' : 'Soru hazırlanıyor') + '<span class="dots"></span></div></div>';
-
-  var results = [];
-  for (var i = 0; i < n; i++) {
-    try {
-      var q = await callAPI(buildPrompt(ders, zorluk, tip));
-      q._ders = ders; q._zorluk = zorluk; q._tip = tip; q._id = Date.now() + i;
-      results.push(q);
-      bank.unshift(q);
-    } catch(e) {
-      area.innerHTML = '<div class="err-box">Soru üretilemedi, lütfen tekrar dene.<code>' + e.message + '</code></div>';
-      setButtons(false);
-      return;
-    }
-  }
-  area.innerHTML = '';
-  results.forEach(function(q) { area.appendChild(buildCard(q)); });
-  setButtons(false);
-}
-
-function buildCard(q) {
-  var letters = ['A','B','C','D'];
-  var diffChip = { 'Kolay': 'chip-green', 'Orta': 'chip-yellow', 'Zor': 'chip-blue' };
-  var ci = parseInt(q.dogru) || 0;
-
-  var gorsel = '';
-  if (q.svg_kod && q.svg_kod.trim().length > 10) {
-    gorsel = '<div class="q-visual">' + q.svg_kod + '</div>';
-  } else if (q.gorsel_icerik && q.gorsel_icerik.trim().length > 3) {
-    gorsel = '<div class="q-visual">' + q.gorsel_icerik.replace(/\n/g, '<br>') + '</div>';
-  }
-
-  var optsHtml = (q.siklar || []).map(function(o, i) {
-    return '<div class="opt" data-i="' + i + '" data-c="' + ci + '">' +
-      '<div class="opt-letter">' + letters[i] + '</div>' +
-      '<span>' + o.replace(/^[A-D]\)\s*/i, '') + '</span>' +
-      '</div>';
-  }).join('');
-
-  var div = document.createElement('div');
-  div.className = 'q-card';
-  div.innerHTML =
-    '<div class="q-meta">' +
-      '<span class="chip chip-blue">' + (q._ders||'') + '</span>' +
-      '<span class="chip ' + (diffChip[q._zorluk]||'chip-yellow') + '">' + (q._zorluk||'') + '</span>' +
-      (q.konu ? '<span class="chip chip-gray">' + q.konu + '</span>' : '') +
-    '</div>' +
-    '<p class="q-text">' + q.soru + '</p>' +
-    gorsel +
-    '<div class="opts">' + optsHtml + '</div>' +
-    '<div class="exp" id="exp-' + q._id + '">' + (q.aciklama||'') + '</div>';
-
-  div.querySelectorAll('.opt').forEach(function(opt) {
-    opt.addEventListener('click', function() {
-      var card = this.closest('.q-card');
-      if (card._done) return;
-      card._done = true;
-      var ii = parseInt(this.dataset.i);
-      var cc = parseInt(this.dataset.c);
-      card.querySelectorAll('.opt').forEach(function(o) { o.classList.add('locked'); });
-      this.classList.add(ii === cc ? 'correct' : 'wrong');
-      if (ii !== cc) card.querySelectorAll('.opt')[cc].classList.add('correct');
-      card.querySelector('.exp').classList.add('show');
-    });
-  });
-  return div;
-}
-
-function renderBank() {
-  var el = document.getElementById('bankArea');
-  if (!bank.length) {
-    el.innerHTML = '<div class="empty-state">Henüz soru üretilmedi. Soru Üret sekmesinden başla.</div>';
-    return;
-  }
-  el.innerHTML = '';
-  bank.forEach(function(q, i) {
-    var diffChip = { 'Kolay': 'chip-green', 'Orta': 'chip-yellow', 'Zor': 'chip-blue' };
-    var d = document.createElement('div');
-    d.className = 'bank-item';
-    d.innerHTML =
-      '<div class="bank-meta">' +
-        '<span class="chip chip-blue">' + (q._ders||'') + '</span>' +
-        '<span class="chip ' + (diffChip[q._zorluk]||'chip-yellow') + '">' + (q._zorluk||'') + '</span>' +
-        (q.konu ? '<span class="chip chip-gray">' + q.konu + '</span>' : '') +
-      '</div>' +
-      '<div class="bank-txt">' + q.soru + '</div>';
-    d.addEventListener('click', (function(qi) {
-      return function() {
-        document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('active'); });
-        document.querySelector('[data-page="uret"]').classList.add('active');
-        document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-        document.getElementById('page-uret').classList.add('active');
-        var area = document.getElementById('soruArea');
-        area.innerHTML = '';
-        area.appendChild(buildCard(qi));
-      };
-    })(q));
-    el.appendChild(d);
-  });
+function handleNotify(e) {
+  e.preventDefault();
+  var email = document.getElementById('notifyEmail').value;
+  alert('Teşekkürler! ' + email + ' adresine haber vereceğiz.');
+  document.getElementById('notifyEmail').value = '';
 }
 </script>
 </body>
