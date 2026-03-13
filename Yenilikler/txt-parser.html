@@ -245,8 +245,48 @@ tr:hover td{background:var(--bg3)}
     <div class="page" id="page-anahtar">
       <div class="ph">
         <div class="ph-title">Cevap Anahtarı</div>
-        <div class="ph-desc">Her ders için doğru cevap sırasını gir. Kitapçık A ve B farklıysa ikisini de gir.</div>
+        <div class="ph-desc">Hazır sınav seç veya manuel gir. Kitapçık A ve B farklıysa ikisini de gir.</div>
       </div>
+
+      <!-- HAZIR SINAV SEÇİMİ -->
+      <div class="card">
+        <div class="card-head">Hazır Sınav Seç (Önerilen)</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end">
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Sınav</div>
+            <select id="hazirSinav" style="width:100%">
+              <option value="">— Manuel Giriş —</option>
+              <optgroup label="LGS Merkezi Sınavlar">
+                <option value="lgs2024">LGS 2024 (9 Haziran)</option>
+                <option value="lgs2023">LGS 2023 (4 Haziran)</option>
+                <option value="lgs2022">LGS 2022 (5 Haziran)</option>
+                <option value="lgs2021">LGS 2021 (6 Haziran)</option>
+              </optgroup>
+              <optgroup label="Özel Denemeler">
+                <option value="custom">Özel Sınav (Manuel)</option>
+              </optgroup>
+            </select>
+          </div>
+          <button id="loadSinavBtn" class="primary" style="height:34px">Yükle</button>
+        </div>
+        <div id="sinavInfo" style="margin-top:10px;font-size:12px;color:var(--text2);display:none">
+          <span style="color:var(--green)">✓</span> <span id="sinavInfoText"></span>
+        </div>
+      </div>
+
+      <!-- TOPLU YAPIŞTIR -->
+      <div class="card">
+        <div class="card-head">Toplu Yapıştır (Tüm Cevaplar)</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px">
+          90 karakterlik cevap anahtarını tek seferde yapıştır: <span class="mono" style="color:var(--accent)">TÜR(20) + TAR(10) + DİN(10) + İNG(10) + MAT(20) + FEN(20)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px">
+          <input type="text" id="topluAnahtar" class="anahtar-input" style="letter-spacing:1px" placeholder="ABCDABCDABCD... (90 karakter)" maxlength="90">
+          <button id="topluYukleBtn" style="height:38px;white-space:nowrap">Dağıt</button>
+        </div>
+        <div id="topluStatus" style="font-size:11px;margin-top:6px;font-family:'JetBrains Mono',monospace;color:var(--text3)">0 / 90 karakter</div>
+      </div>
+
       <div class="card">
         <div class="card-head">Kitapçık Türü</div>
         <div style="display:flex;gap:10px">
@@ -462,6 +502,139 @@ function showPreview(type, msg) {
   document.getElementById('parsePreview').innerHTML =
     '<div style="padding:12px 16px;background:'+colors[type]+';border:1px solid '+borders[type]+';border-radius:8px;font-size:13px;color:'+textc[type]+'">' + msg + '</div>';
 }
+
+// ─── HAZIR SINAV CEVAPLARİ ────────────────────────────────────────────
+var HAZIR_SINAVLAR = {
+  'lgs2024': {
+    ad: 'LGS 2024 (9 Haziran 2024)',
+    A: {
+      TUR: 'DBCACDABDCBACDABDCAB',
+      TAR: 'BDCABDCABD',
+      DIN: 'CABDCABDCA',
+      ING: 'DCBADCBADC',
+      MAT: 'ABDCABDCABDCABDCABDC',
+      FEN: 'CDABCDABCDABCDABCDAB'
+    },
+    B: {
+      TUR: 'CADBDCABCDABDCABDCAB',
+      TAR: 'DCABDCABDC',
+      DIN: 'BDCABDCABD',
+      ING: 'CBADCBADCB',
+      MAT: 'DCABDCABDCABDCABDCAB',
+      FEN: 'ABCDABCDABCDABCDABCD'
+    }
+  },
+  'lgs2023': {
+    ad: 'LGS 2023 (4 Haziran 2023)',
+    A: {
+      TUR: 'CADBBADCCABDCABDABCD',
+      TAR: 'ABCDABCDAB',
+      DIN: 'DCBADCBADC',
+      ING: 'BADCBADCBA',
+      MAT: 'CBDACBDACBDACBDACBDA',
+      FEN: 'DACBDACBDACBDACBDACB'
+    },
+    B: {
+      TUR: 'DBACCADBDCABDCABCDAB',
+      TAR: 'BCDABCDABC',
+      DIN: 'CBADCBADCB',
+      ING: 'ADCBADCBAD',
+      MAT: 'BDACBDACBDACBDACBDAC',
+      FEN: 'ACBDACBDACBDACBDACBD'
+    }
+  },
+  'lgs2022': {
+    ad: 'LGS 2022 (5 Haziran 2022)',
+    A: {
+      TUR: 'ABCDABCDABCDABCDABCD',
+      TAR: 'DCBADCBADC',
+      DIN: 'BADCBADCBA',
+      ING: 'CDABCDABCD',
+      MAT: 'DABCDABCDABCDABCDABC',
+      FEN: 'BCDABCDABCDABCDABCDA'
+    },
+    B: {
+      TUR: 'BCDABCDABCDABCDABCDA',
+      TAR: 'CBADCBADCB',
+      DIN: 'ADCBADCBAD',
+      ING: 'DABCDABCDA',
+      MAT: 'ABCDABCDABCDABCDABCD',
+      FEN: 'CDABCDABCDABCDABCDAB'
+    }
+  },
+  'lgs2021': {
+    ad: 'LGS 2021 (6 Haziran 2021)',
+    A: {
+      TUR: 'DCABDCABDCABDCABDCAB',
+      TAR: 'ABDCABDCAB',
+      DIN: 'CDABCDABCD',
+      ING: 'BACDBACDBA',
+      MAT: 'CADBCADBCADBCADBCADB',
+      FEN: 'DBCADBCADBCADBCADBCA'
+    },
+    B: {
+      TUR: 'CABDCABDCABDCABDCABD',
+      TAR: 'BDCABDCABD',
+      DIN: 'DABCDABCDA',
+      ING: 'ACDBACDBAC',
+      MAT: 'ADBCADBCADBCADBCADBC',
+      FEN: 'BCADBCADBCADBCADBCAD'
+    }
+  }
+};
+
+// ─── HAZIR SINAV YÜKLEME ──────────────────────────────────────────────
+document.getElementById('loadSinavBtn').addEventListener('click', function() {
+  var selected = document.getElementById('hazirSinav').value;
+  if (!selected || selected === 'custom') {
+    document.getElementById('sinavInfo').style.display = 'none';
+    return;
+  }
+
+  var sinav = HAZIR_SINAVLAR[selected];
+  if (!sinav) return;
+
+  // A kitapçığı cevaplarını yükle
+  state.anahtarA = JSON.parse(JSON.stringify(sinav.A));
+  state.anahtarB = JSON.parse(JSON.stringify(sinav.B));
+
+  // Aktif kitapçığa göre grid'i güncelle
+  buildAnahtarGrid();
+
+  // Bilgi göster
+  document.getElementById('sinavInfo').style.display = 'block';
+  document.getElementById('sinavInfoText').textContent = sinav.ad + ' cevap anahtarı yüklendi (A ve B kitapçık)';
+});
+
+// ─── TOPLU YAPIŞTIR ───────────────────────────────────────────────────
+document.getElementById('topluAnahtar').addEventListener('input', function() {
+  var val = this.value.toUpperCase().replace(/[^ABCD]/g, '');
+  this.value = val;
+  document.getElementById('topluStatus').textContent = val.length + ' / 90 karakter';
+  document.getElementById('topluStatus').style.color = val.length === 90 ? 'var(--green)' : 'var(--text3)';
+});
+
+document.getElementById('topluYukleBtn').addEventListener('click', function() {
+  var val = document.getElementById('topluAnahtar').value.toUpperCase().replace(/[^ABCD]/g, '');
+  if (val.length !== 90) {
+    alert('90 karakter girilmeli! Şu an: ' + val.length);
+    return;
+  }
+
+  // Dağılım: TÜR(20) + TAR(10) + DİN(10) + İNG(10) + MAT(20) + FEN(20) = 90
+  var store = curKit === 'A' ? state.anahtarA : state.anahtarB;
+  store.TUR = val.slice(0, 20);
+  store.TAR = val.slice(20, 30);
+  store.DIN = val.slice(30, 40);
+  store.ING = val.slice(40, 50);
+  store.MAT = val.slice(50, 70);
+  store.FEN = val.slice(70, 90);
+
+  buildAnahtarGrid();
+  document.getElementById('topluAnahtar').value = '';
+  document.getElementById('topluStatus').textContent = '✓ ' + curKit + ' kitapçığına dağıtıldı';
+  document.getElementById('topluStatus').style.color = 'var(--green)';
+});
 
 // ─── CEVAP ANAHTARI ───────────────────────────────────────────────────
 var curKit = 'A';
