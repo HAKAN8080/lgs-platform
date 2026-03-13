@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optik TXT Parser — LGS Analitik</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c10;
+  --bg2: #12151c;
+  --bg3: #1a1e28;
+  --bg4: #222736;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #dde2f0;
+  --text2: #7b85a0;
+  --text3: #444d66;
+  --accent: #5b8dee;
+  --accent-bg: rgba(91,141,238,0.1);
+  --accent-border: rgba(91,141,238,0.25);
+  --green: #4caf8a;
+  --green-bg: rgba(76,175,138,0.1);
+  --green-border: rgba(76,175,138,0.25);
+  --red: #e05c5c;
+  --red-bg: rgba(224,92,92,0.1);
+  --red-border: rgba(224,92,92,0.25);
+  --yellow: #e8a840;
+  --yellow-bg: rgba(232,168,64,0.1);
+  --yellow-border: rgba(232,168,64,0.25);
+  --r: 8px;
+  --r2: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.logo-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.nav{padding:12px 10px;flex:1}
+.nav-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;padding:6px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:13px;font-weight:600;transition:all 0.12s;border:1px solid transparent;margin-bottom:2px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.steps{padding:16px 20px;border-top:1px solid var(--border)}
+.step{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;opacity:0.4;transition:opacity 0.2s}
+.step.done{opacity:1}
+.step-num{width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;color:var(--text2)}
+.step.done .step-num{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+.step-txt{font-size:12px;color:var(--text2);line-height:1.5}
+.step.done .step-txt{color:var(--text)}
+
+/* MAIN */
+.main{overflow-y:auto}
+.page{display:none;padding:28px 32px}
+.page.on{display:block}
+.ph{margin-bottom:24px}
+.ph-title{font-size:22px;font-weight:700;letter-spacing:-0.5px}
+.ph-desc{font-size:13px;color:var(--text2);margin-top:5px;line-height:1.6}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:16px}
+.card-head{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px}
+
+/* UPLOAD */
+.drop-zone{border:1px dashed var(--border2);border-radius:var(--r2);padding:36px;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--bg3);position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:var(--accent-bg)}
+.drop-ico{font-size:32px;margin-bottom:10px;opacity:0.35}
+.drop-main{font-size:14px;font-weight:600;color:var(--text)}
+.drop-sub{font-size:12px;color:var(--text3);margin-top:4px}
+input[type=file]{display:none}
+
+/* TEXTAREA */
+textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:12px;resize:vertical;line-height:1.7}
+textarea:focus{outline:none;border-color:var(--accent)}
+
+/* FORMAT CONFIG */
+.format-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.fld{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.fld-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.fld-val{font-size:13px;color:var(--text);font-family:'JetBrains Mono',monospace}
+input[type=number],input[type=text],select{width:100%;height:34px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:13px;font-family:'Syne',sans-serif;padding:0 10px}
+input[type=number]:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--accent)}
+
+/* ANSWER KEY */
+.ders-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ders-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ders-name{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.ders-count{font-size:10px;font-weight:600;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.anahtar-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;letter-spacing:0.1em;text-transform:uppercase}
+.anahtar-input:focus{outline:none;border-color:var(--accent)}
+.anahtar-status{font-size:10px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.ok{color:var(--green)}.warn{color:var(--yellow)}.err{color:var(--red)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;margin-top:14px}
+button{height:38px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;padding:0 18px;transition:all 0.12s}
+button:hover{background:var(--bg4);border-color:var(--border2)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{opacity:0.88}
+button.success{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+button:disabled{opacity:0.35;cursor:not-allowed}
+
+/* RESULTS TABLE */
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.result-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.stat-val{font-size:24px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+.stat-box.blue{border-color:var(--accent-border);background:var(--accent-bg)}.stat-box.blue .stat-val{color:var(--accent)}
+.stat-box.green{border-color:var(--green-border);background:var(--green-bg)}.stat-box.green .stat-val{color:var(--green)}
+.stat-box.red{border-color:var(--red-border);background:var(--red-bg)}.stat-box.red .stat-val{color:var(--red)}
+.stat-box.yellow{border-color:var(--yellow-border);background:var(--yellow-bg)}.stat-box.yellow .stat-val{color:var(--yellow)}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r2)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--bg3)}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg3)}
+.net-cell{font-weight:600}
+.net-high{color:var(--green)}
+.net-mid{color:var(--yellow)}
+.net-low{color:var(--red)}
+.puan-cell{color:var(--accent);font-weight:700}
+.chip{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;font-family:'Syne',sans-serif}
+.chip-a{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.chip-b{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
+
+/* LOADING */
+.spin{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp 0.6s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* DETAIL MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);max-width:700px;width:100%;max-height:85vh;overflow-y:auto;padding:24px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-size:18px;font-weight:700}
+.modal-close{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;width:30px;height:30px;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0}
+.modal-close:hover{background:var(--bg3);color:var(--text)}
+.cevap-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.c-cell{width:100%;aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:500}
+.c-d{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.c-y{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.c-b{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-name">LGS Analitik</div>
+      <div class="logo-sub">// optik_parser v1.0</div>
+    </div>
+    <div class="nav">
+      <div class="nav-label">Adımlar</div>
+      <div class="nav-item on" data-p="upload"><span class="nav-dot"></span>TXT Yükle</div>
+      <div class="nav-item" data-p="anahtar"><span class="nav-dot"></span>Cevap Anahtarı</div>
+      <div class="nav-item" data-p="results"><span class="nav-dot"></span>Sonuçlar</div>
+    </div>
+    <div class="steps">
+      <div class="step" id="st1">
+        <div class="step-num">1</div>
+        <div class="step-txt">TXT dosyası yükle veya yapıştır</div>
+      </div>
+      <div class="step" id="st2">
+        <div class="step-num">2</div>
+        <div class="step-txt">6 ders için cevap anahtarı gir</div>
+      </div>
+      <div class="step" id="st3">
+        <div class="step-num">3</div>
+        <div class="step-txt">Hesapla → Sonuçları gör / indir</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- STEP 1: UPLOAD -->
+    <div class="page on" id="page-upload">
+      <div class="ph">
+        <div class="ph-title">TXT Dosyası Yükle</div>
+        <div class="ph-desc">Optik okuyucudan gelen Optixy formatındaki TXT dosyasını yükle ya da içeriği yapıştır.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Dosya Yükle</div>
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-ico">📋</div>
+          <div class="drop-main">TXT dosyasını buraya sürükle veya tıkla</div>
+          <div class="drop-sub">Optixy formatı · .txt uzantılı</div>
+        </div>
+        <input type="file" id="fileIn" accept=".txt,.csv">
+      </div>
+
+      <div class="card">
+        <div class="card-head">veya Manuel Yapıştır</div>
+        <textarea id="rawText" rows="6" placeholder="TXT içeriğini buraya yapıştır...&#10;&#10;Örnek format:&#10;482309459468A  ACACDBCABBACBBCADA  CBCBAAADCCBA  DCDBCACBBC  CBDCBDBACD  CDBCCAABC  CCCAACBDA"></textarea>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;font-family:'JetBrains Mono',monospace" id="lineCount">— satır</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">Format Yapılandırma</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.65">
+          Her satır: <span class="mono" style="color:var(--accent);background:var(--accent-bg);padding:1px 6px;border-radius:4px">[ÖĞRENCİ_NO] [KİTAPÇIK] [CEVAPLAR...]</span>
+          — alanlar boşlukla ayrılır, boş cevap = boşluk karakteri
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Sınav Türü</div>
+            <select id="sinavTuru">
+              <option value="lgs">LGS (4 şık · TÜR20+TAR10+DİN10+İNG10+MAT20+FEN20)</option>
+              <option value="tyt">TYT (5 şık · TÜR40+SOS20+MAT40+FEN20)</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Öğrenci No Konum (sütun)</div>
+            <input type="number" id="noCol" value="0" min="0" max="10" style="width:80px">
+            <span style="font-size:12px;color:var(--text3);margin-left:8px">(0 = ilk alan)</span>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Cevap Bloklarının Sütun Sırası</div>
+          <div id="colConfig" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="primary" id="parseBtn">Satırları Analiz Et →</button>
+      </div>
+      <div id="parsePreview" style="margin-top:14px"></div>
+    </div>
+
+    <!-- STEP 2: ANAHTAR -->
+    <div class="page" id="page-anahtar">
+      <div class="ph">
+        <div class="ph-title">Cevap Anahtarı</div>
+        <div class="ph-desc">Her ders için doğru cevap sırasını gir. Kitapçık A ve B farklıysa ikisini de gir.</div>
+      </div>
+      <div class="card">
+        <div class="card-head">Kitapçık Türü</div>
+        <div style="display:flex;gap:10px">
+          <button id="btnKitA" class="primary" onclick="setKit('A')">A Kitapçığı</button>
+          <button id="btnKitB" onclick="setKit('B')">B Kitapçığı</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">Cevap Anahtarları — <span id="kitLabel" style="color:var(--accent)">A Kitapçığı</span></div>
+        <div class="ders-grid" id="anahtarGrid"></div>
+      </div>
+      <div class="btn-row">
+        <button onclick="goPage('upload')">← Geri</button>
+        <button class="primary" id="calcBtn">Hesapla ve Sonuçları Göster →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: RESULTS -->
+    <div class="page" id="page-results">
+      <div class="ph">
+        <div class="ph-title">Sonuçlar</div>
+        <div class="ph-desc">Tüm öğrencilerin net ve puan hesapları. Detay için satıra tıkla.</div>
+      </div>
+      <div class="result-stats" id="statsRow"></div>
+      <div class="card">
+        <div class="result-header">
+          <div style="font-size:13px;color:var(--text2)" id="resultInfo"></div>
+          <div style="display:flex;gap:8px">
+            <button class="success" id="csvBtn">CSV İndir</button>
+            <button onclick="goPage('anahtar')">← Anahtarı Düzelt</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="resultTable">
+            <thead><tr id="tblHead"></tr></thead>
+            <tbody id="tblBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Öğrenci Detayı</div>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────
+var state = {
+  rawLines: [],
+  parsed: [],    // [{no, kit, blocks:[str,str,...]}]
+  results: [],   // [{no, kit, dersler:{TUR:{d,y,b,net},...}, toplam, puan, sira}]
+  kitActive: 'A',
+  anahtarA: {},
+  anahtarB: {},
+  config: null
+};
+
+var DERSLER_LGS = [
+  { key:'TUR', label:'Türkçe',   soru:20, col:1 },
+  { key:'TAR', label:'İnk.Tar.', soru:10, col:2 },
+  { key:'DIN', label:'Din K.',   soru:10, col:3 },
+  { key:'ING', label:'İngilizce',soru:10, col:4 },
+  { key:'MAT', label:'Matematik',soru:20, col:5 },
+  { key:'FEN', label:'Fen',      soru:20, col:6 }
+];
+var DERSLER_TYT = [
+  { key:'TUR', label:'Türkçe',   soru:40, col:1 },
+  { key:'SOS', label:'Sosyal',   soru:20, col:2 },
+  { key:'MAT', label:'Matematik',soru:40, col:3 },
+  { key:'FEN', label:'Fen',      soru:20, col:4 }
+];
+
+function getDersler() {
+  return document.getElementById('sinavTuru').value === 'tyt' ? DERSLER_TYT : DERSLER_LGS;
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(function(el) {
+  el.addEventListener('click', function() { goPage(this.dataset.p); });
+});
+function goPage(id) {
+  document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('on'); });
+  document.querySelector('[data-p="'+id+'"]').classList.add('on');
+  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('on'); });
+  document.getElementById('page-'+id).classList.add('on');
+  if (id === 'anahtar') buildAnahtarGrid();
+  if (id === 'results') renderResults();
+}
+
+// ─── UPLOAD ───────────────────────────────────────────────────────────
+document.getElementById('dropZone').addEventListener('click', function() {
+  document.getElementById('fileIn').click();
+});
+document.getElementById('dropZone').addEventListener('dragover', function(e) {
+  e.preventDefault(); this.classList.add('drag');
+});
+document.getElementById('dropZone').addEventListener('dragleave', function() {
+  this.classList.remove('drag');
+});
+document.getElementById('dropZone').addEventListener('drop', function(e) {
+  e.preventDefault(); this.classList.remove('drag');
+  var f = e.dataTransfer.files[0];
+  if (f) readFile(f);
+});
+document.getElementById('fileIn').addEventListener('change', function() {
+  if (this.files[0]) readFile(this.files[0]);
+});
+function readFile(f) {
+  var r = new FileReader();
+  r.onload = function(e) {
+    document.getElementById('rawText').value = e.target.result;
+    updateLineCount();
+  };
+  r.readAsText(f, 'utf-8');
+}
+document.getElementById('rawText').addEventListener('input', updateLineCount);
+function updateLineCount() {
+  var lines = getLines();
+  document.getElementById('lineCount').textContent = lines.length + ' satır okundu';
+}
+function getLines() {
+  return document.getElementById('rawText').value
+    .split('\n')
+    .map(function(l){ return l.trim(); })
+    .filter(function(l){ return l.length > 0; });
+}
+
+// Column config UI
+document.getElementById('sinavTuru').addEventListener('change', buildColConfig);
+function buildColConfig() {
+  var cc = document.getElementById('colConfig');
+  cc.innerHTML = '';
+  getDersler().forEach(function(d) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px';
+    wrap.innerHTML = '<span style="font-size:11px;font-weight:600;color:var(--accent);min-width:28px">'+d.label.slice(0,3)+'</span>' +
+      '<input type="number" id="col_'+d.key+'" value="'+d.col+'" min="1" max="20" style="width:44px;height:26px;font-size:12px;padding:0 6px">' +
+      '<span style="font-size:10px;color:var(--text3)">'+d.soru+'s</span>';
+    cc.appendChild(wrap);
+  });
+}
+buildColConfig();
+
+// ─── PARSE ────────────────────────────────────────────────────────────
+document.getElementById('parseBtn').addEventListener('click', parseTxt);
+function parseTxt() {
+  var lines = getLines();
+  if (!lines.length) { showPreview('error','Satır bulunamadı.'); return; }
+  
+  var dersler = getDersler();
+  var noCol = parseInt(document.getElementById('noCol').value) || 0;
+  
+  state.parsed = [];
+  var errors = 0;
+  
+  lines.forEach(function(line, li) {
+    // Split by 2+ spaces or tab
+    var parts = line.split(/\s{2,}|\t/).map(function(p){ return p.trim(); });
+    if (parts.length < 2) {
+      // Try single-space split as fallback
+      parts = line.split(/\s+/);
+    }
+    
+    var no = parts[noCol] || ('SATIR_'+(li+1));
+    // Try to extract kitapçık from student no or next field
+    var kit = 'A';
+    var noClean = no;
+    // If no contains a letter like A or B in middle: 482309459468A95428...
+    var kitMatch = no.match(/[AB]/i);
+    if (kitMatch) {
+      kit = kitMatch[0].toUpperCase();
+      noClean = no.replace(/[AB]/gi,'').replace(/\s/g,'');
+    } else if (parts[noCol+1] && /^[AB]$/i.test(parts[noCol+1])) {
+      kit = parts[noCol+1].toUpperCase();
+    }
+    
+    var blocks = {};
+    dersler.forEach(function(d) {
+      var colIdx = parseInt(document.getElementById('col_'+d.key).value) || d.col;
+      var raw = parts[colIdx] || '';
+      // Pad to expected length with space (boş)
+      while (raw.length < d.soru) raw += ' ';
+      blocks[d.key] = raw.slice(0, d.soru).toUpperCase();
+    });
+    
+    state.parsed.push({ no: noClean, kit: kit, blocks: blocks, raw: line });
+  });
+  
+  state.rawLines = lines;
+  document.getElementById('st1').classList.add('done');
+  
+  showPreview('ok', state.parsed.length + ' öğrenci ayrıştırıldı. Örnek: <span class="mono" style="color:var(--accent)">' +
+    (state.parsed[0] ? state.parsed[0].no + ' | Kit:' + state.parsed[0].kit : '') + '</span>');
+  
+  // Auto go to anahtar
+  setTimeout(function(){ goPage('anahtar'); }, 800);
+}
+
+function showPreview(type, msg) {
+  var colors = { ok: 'var(--green-bg)', error: 'var(--red-bg)' };
+  var borders = { ok: 'var(--green-border)', error: 'var(--red-border)' };
+  var textc = { ok: 'var(--green)', error: 'var(--red)' };
+  document.getElementById('parsePreview').innerHTML =
+    '<div style="padding:12px 16px;background:'+colors[type]+';border:1px solid '+borders[type]+';border-radius:8px;font-size:13px;color:'+textc[type]+'">' + msg + '</div>';
+}
+
+// ─── CEVAP ANAHTARI ───────────────────────────────────────────────────
+var curKit = 'A';
+function setKit(k) {
+  curKit = k;
+  document.getElementById('kitLabel').textContent = k + ' Kitapçığı';
+  document.getElementById('btnKitA').className = k === 'A' ? 'primary' : '';
+  document.getElementById('btnKitB').className = k === 'B' ? 'primary' : '';
+  buildAnahtarGrid();
+}
+
+function buildAnahtarGrid() {
+  var grid = document.getElementById('anahtarGrid');
+  grid.innerHTML = '';
+  var store = curKit === 'A' ? state.anahtarA : state.anahtarB;
+  
+  getDersler().forEach(function(d) {
+    var div = document.createElement('div');
+    div.className = 'ders-card';
+    var val = store[d.key] || '';
+    div.innerHTML =
+      '<div class="ders-name">' + d.label + ' <span class="ders-count">' + d.soru + ' soru</span></div>' +
+      '<input class="anahtar-input" id="ak_'+d.key+'" maxlength="'+d.soru+'" placeholder="'+('ABCD'.repeat(Math.ceil(d.soru/4)).slice(0,d.soru))+'..." value="'+val+'">' +
+      '<div class="anahtar-status" id="aks_'+d.key+'">0 / '+d.soru+'</div>';
+    grid.appendChild(div);
+    
+    var inp = div.querySelector('#ak_'+d.key);
+    inp.addEventListener('input', function() { validateAnahtar(d.key, d.soru); });
+    validateAnahtar(d.key, d.soru);
+  });
+}
+
+function validateAnahtar(key, soru) {
+  var inp = document.getElementById('ak_'+key);
+  var st = document.getElementById('aks_'+key);
+  if (!inp || !st) return;
+  var val = inp.value.toUpperCase().replace(/[^ABCDE]/g,'');
+  inp.value = val;
+  var store = curKit === 'A' ? state.anahtarA : state.anahtarB;
+  store[key] = val;
+  var n = val.length;
+  if (n === soru) {
+    st.className = 'anahtar-status ok';
+    st.textContent = '✓ ' + n + ' / ' + soru;
+  } else {
+    st.className = 'anahtar-status warn';
+    st.textContent = n + ' / ' + soru;
+  }
+}
+
+// ─── HESAPLA ──────────────────────────────────────────────────────────
+document.getElementById('calcBtn').addEventListener('click', function() {
+  if (!state.parsed.length) { alert('Önce TXT yükle ve analiz et.'); return; }
+  
+  var dersler = getDersler();
+  var tur = document.getElementById('sinavTuru').value;
+  var yanlisKatsayi = tur === 'lgs' ? 3 : 4; // LGS: 1/3, TYT: 1/4
+  
+  state.results = [];
+  
+  state.parsed.forEach(function(p) {
+    var kit = p.kit;
+    var anahtar = kit === 'B' && Object.keys(state.anahtarB).length > 0 ? state.anahtarB : state.anahtarA;
+    
+    var toplamNet = 0;
+    var dersSonuc = {};
+    
+    dersler.forEach(function(d) {
+      var cevap = p.blocks[d.key] || '';
+      var key_ans = (anahtar[d.key] || '').toUpperCase();
+      var dogru = 0, yanlis = 0, bos = 0;
+      
+      for (var i = 0; i < d.soru; i++) {
+        var c = (cevap[i] || ' ').toUpperCase();
+        var a = (key_ans[i] || '').toUpperCase();
+        if (c === ' ' || c === '' || c === '-') {
+          bos++;
+        } else if (c === a) {
+          dogru++;
+        } else {
+          yanlis++;
+        }
+      }
+      var net = Math.max(0, dogru - yanlis / yanlisKatsayi);
+      net = Math.round(net * 100) / 100;
+      dersSonuc[d.key] = { d: dogru, y: yanlis, b: bos, net: net, cevap: cevap, anahtar: key_ans };
+      toplamNet += net;
+    });
+    
+    toplamNet = Math.round(toplamNet * 100) / 100;
+    var maxSoru = dersler.reduce(function(a,d){ return a+d.soru; }, 0);
+    var puan = Math.round((100 + (toplamNet / maxSoru) * 400) * 1000) / 1000;
+    
+    state.results.push({
+      no: p.no, kit: p.kit,
+      dersler: dersSonuc,
+      toplam: toplamNet,
+      puan: puan,
+      raw: p.raw
+    });
+  });
+  
+  // Sıralama
+  state.results.sort(function(a,b){ return b.toplam - a.toplam; });
+  state.results.forEach(function(r, i){ r.sira = i + 1; });
+  
+  document.getElementById('st2').classList.add('done');
+  document.getElementById('st3').classList.add('done');
+  goPage('results');
+});
+
+// ─── RESULTS ──────────────────────────────────────────────────────────
+function renderResults() {
+  if (!state.results.length) return;
+  var dersler = getDersler();
+  var res = state.results;
+  
+  // Stats
+  var ortalama = res.reduce(function(a,r){ return a+r.toplam; },0) / res.length;
+  var maxNet = Math.max.apply(null, res.map(function(r){ return r.toplam; }));
+  var minNet = Math.min.apply(null, res.map(function(r){ return r.toplam; }));
+  var avgPuan = res.reduce(function(a,r){ return a+r.puan; },0) / res.length;
+  
+  document.getElementById('statsRow').innerHTML =
+    '<div class="stat-box blue"><div class="stat-val">'+res.length+'</div><div class="stat-lbl">Öğrenci</div></div>' +
+    '<div class="stat-box green"><div class="stat-val">'+ortalama.toFixed(2)+'</div><div class="stat-lbl">Ortalama Net</div></div>' +
+    '<div class="stat-box yellow"><div class="stat-val">'+maxNet.toFixed(2)+'</div><div class="stat-lbl">En Yüksek Net</div></div>' +
+    '<div class="stat-box red"><div class="stat-val">'+avgPuan.toFixed(0)+'</div><div class="stat-lbl">Ort. LGS Puanı</div></div>';
+  
+  document.getElementById('resultInfo').textContent = res.length + ' öğrenci · ' + dersler.length + ' ders';
+  
+  // Table header
+  var th = '<th>#</th><th>Öğrenci No</th><th>Kit</th>';
+  dersler.forEach(function(d){ th += '<th>'+d.label+'</th>'; });
+  th += '<th>Toplam Net</th><th>LGS Puanı</th>';
+  document.getElementById('tblHead').innerHTML = th;
+  
+  // Table body
+  var tbody = '';
+  res.forEach(function(r) {
+    var row = '<td>'+r.sira+'</td><td style="color:var(--text);font-weight:600">'+r.no+'</td>' +
+      '<td><span class="chip chip-'+(r.kit||'a').toLowerCase()+'">'+r.kit+'</span></td>';
+    
+    dersler.forEach(function(d) {
+      var s = r.dersler[d.key];
+      var cls = s.net >= d.soru*0.8 ? 'net-high' : s.net >= d.soru*0.5 ? 'net-mid' : 'net-low';
+      row += '<td class="net-cell '+cls+'" title="D:'+s.d+' Y:'+s.y+' B:'+s.b+'">'+s.net.toFixed(2)+'</td>';
+    });
+    
+    var topCls = r.toplam >= 75 ? 'net-high' : r.toplam >= 50 ? 'net-mid' : 'net-low';
+    row += '<td class="net-cell '+topCls+'" style="font-size:13px">'+r.toplam.toFixed(2)+'</td>';
+    row += '<td class="puan-cell" style="font-size:13px">'+r.puan.toFixed(3)+'</td>';
+    tbody += '<tr style="cursor:pointer" data-no="'+r.no+'">' + row + '</tr>';
+  });
+  document.getElementById('tblBody').innerHTML = tbody;
+  
+  // Row click → detail
+  document.querySelectorAll('#tblBody tr').forEach(function(tr) {
+    tr.addEventListener('click', function() { showDetail(this.dataset.no); });
+  });
+}
+
+// ─── DETAIL ───────────────────────────────────────────────────────────
+function showDetail(no) {
+  var r = state.results.find(function(x){ return x.no === no; });
+  if (!r) return;
+  var dersler = getDersler();
+  
+  document.getElementById('modalTitle').textContent = 'Öğrenci No: ' + r.no + '  |  Kitapçık: ' + r.kit + '  |  Sıra: ' + r.sira;
+  
+  var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">' +
+    '<div class="stat-box green"><div class="stat-val">'+r.toplam.toFixed(2)+'</div><div class="stat-lbl">Toplam Net</div></div>' +
+    '<div class="stat-box blue"><div class="stat-val">'+r.puan.toFixed(3)+'</div><div class="stat-lbl">LGS Puanı</div></div>' +
+    '<div class="stat-box yellow"><div class="stat-val">#'+r.sira+'</div><div class="stat-lbl">Genel Sıra</div></div>' +
+    '</div>';
+  
+  dersler.forEach(function(d) {
+    var s = r.dersler[d.key];
+    html += '<div style="margin-bottom:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">' +
+        d.label +
+        '<span style="font-family:JetBrains Mono;font-size:11px;color:var(--text2)">D:'+s.d+' Y:'+s.y+' B:'+s.b+' Net:'+s.net.toFixed(2)+'</span>' +
+      '</div>' +
+      '<div class="cevap-grid">';
+    
+    for (var i = 0; i < d.soru; i++) {
+      var c = (s.cevap[i] || ' ').toUpperCase();
+      var a = (s.anahtar[i] || '').toUpperCase();
+      var cls, lbl;
+      if (c === ' ' || c === '' || c === '-') {
+        cls = 'c-b'; lbl = '—';
+      } else if (c === a) {
+        cls = 'c-d'; lbl = c;
+      } else {
+        cls = 'c-y'; lbl = c;
+      }
+      html += '<div class="c-cell '+cls+'" title="Soru '+(i+1)+': Öğr='+c+' Cevap='+a+'">'+lbl+'</div>';
+    }
+    html += '</div></div>';
+  });
+  
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+}
+document.getElementById('closeModal').addEventListener('click', function() {
+  document.getElementById('overlay').classList.remove('show');
+});
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
+
+// ─── CSV EXPORT ───────────────────────────────────────────────────────
+document.getElementById('csvBtn').addEventListener('click', function() {
+  if (!state.results.length) return;
+  var dersler = getDersler();
+  var lines = [];
+  
+  var header = ['Sira','OgrenciNo','Kitapcik'];
+  dersler.forEach(function(d){
+    header.push(d.label+'_D', d.label+'_Y', d.label+'_B', d.label+'_Net');
+  });
+  header.push('ToplamNet','LGS_Puani');
+  lines.push(header.join(','));
+  
+  state.results.forEach(function(r) {
+    var row = [r.sira, r.no, r.kit];
+    dersler.forEach(function(d) {
+      var s = r.dersler[d.key];
+      row.push(s.d, s.y, s.b, s.net.toFixed(2));
+    });
+    row.push(r.toplam.toFixed(2), r.puan.toFixed(3));
+    lines.push(row.join(','));
+  });
+  
+  var blob = new Blob(['\uFEFF'+lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'lgs_sonuclar.csv';
+  a.click(); URL.revokeObjectURL(url);
+});
+
+// Init
+updateLineCount();
+</script>
+</body>
+</html>

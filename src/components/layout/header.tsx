@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Calculator, BookOpen, User, Crown, LogOut, Loader2 } from 'lucide-react'
+import { Menu, X, Calculator, BookOpen, User, Crown, LogOut, Loader2, Building2 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import { signOut } from '@/lib/firebase/auth'
 import { useRouter } from 'next/navigation'
@@ -18,6 +18,8 @@ const navigation = [
       { name: 'Haftalık Strateji', href: '/panel/strateji' },
       { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
       { name: 'Çalışma Programı', href: '/icerik/calisma-programi' },
+      { name: 'Optik TXT Parser', href: '/araclar/txt-parser.html' },
+      { name: 'AI Soru Üretici', href: '/araclar/lgs-soru-uretici.html' },
     ],
   },
   {
@@ -31,6 +33,7 @@ const navigation = [
   },
   { name: 'Öğrenci Paneli', href: '/panel' },
   { name: 'Premium', href: '/premium', icon: Crown },
+  { name: 'Kurumsal', href: '/kurumsal', icon: Building2 },
 ]
 
 export function Header() {

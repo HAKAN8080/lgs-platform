@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock, CalendarDays, ArrowRight, CheckCircle } from 'lucide-react'
+import { Calculator, School, Bot, Target, TrendingUp, FileText, Sparkles, Clock, CalendarDays, ArrowRight, CheckCircle, FileSpreadsheet, Wand2, Building2 } from 'lucide-react'
 
 const tools = [
   {
@@ -42,12 +42,30 @@ const tools = [
     bg: 'bg-purple-500/10',
     border: 'hover:border-purple-500/40',
   },
+  {
+    name: 'Optik TXT Parser',
+    description: 'Optixy TXT dosyalarını analiz et',
+    href: '/araclar/txt-parser.html',
+    icon: FileSpreadsheet,
+    color: 'text-cyan-500',
+    bg: 'bg-cyan-500/10',
+    border: 'hover:border-cyan-500/40',
+  },
+  {
+    name: 'AI Soru Üretici',
+    description: 'MEB stilinde AI destekli soru üret',
+    href: '/araclar/lgs-soru-uretici.html',
+    icon: Wand2,
+    color: 'text-pink-500',
+    bg: 'bg-pink-500/10',
+    border: 'hover:border-pink-500/40',
+  },
 ]
 
 const stats = [
   { value: '14', label: 'Şehir' },
   { value: '300+', label: 'Okul Verisi' },
-  { value: '4', label: 'Ücretsiz Araç' },
+  { value: '6', label: 'Ücretsiz Araç' },
   { value: '2026', label: 'LGS Yılı' },
 ]
 
@@ -217,7 +235,7 @@ export default function Home() {
             <h2 className="mt-2 text-3xl font-bold text-foreground">Ücretsiz Araçlar</h2>
             <p className="mt-3 text-muted-foreground">Hemen kullanmaya başla, kayıt gerektirmez</p>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {tools.map((tool) => (
               <Link
                 key={tool.name}
@@ -313,6 +331,40 @@ export default function Home() {
             <p className="mt-4 text-xs text-muted-foreground">
               LGS 2026 (Haziran) tarihine kadar geçerli • 1.092.206+ öğrenci arasında fark yarat
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Kurumsal Section */}
+      <section className="py-16 sm:py-24 bg-accent/30">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10 p-8 sm:p-12">
+            <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+              <div className="text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-3 py-1 text-sm font-medium text-purple-500 mb-4">
+                  <Building2 className="h-4 w-4" />
+                  Okullar ve Dershaneler İçin
+                </div>
+                <h2 className="text-3xl font-bold text-foreground">Kurumsal Çözümler</h2>
+                <p className="mt-4 text-muted-foreground max-w-xl">
+                  Optik okuyucu entegrasyonu, toplu öğrenci yönetimi ve detaylı performans analizleri ile öğrencilerinizin başarısını artırın.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/kurumsal"
+                  className="rounded-lg bg-purple-600 px-6 py-3 text-sm font-semibold text-white hover:bg-purple-700 transition-colors text-center"
+                >
+                  Kurumsal Başvuru
+                </Link>
+                <Link
+                  href="/kurumsal"
+                  className="rounded-lg border border-purple-500/50 px-6 py-3 text-sm font-semibold text-purple-500 hover:bg-purple-500/10 transition-colors text-center"
+                >
+                  Detaylı Bilgi
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
