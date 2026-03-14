@@ -19,7 +19,9 @@ import {
   ArrowRight,
   School,
   GraduationCap,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react'
 
 const features = [
@@ -416,8 +418,53 @@ export default function KurumsalPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Tools */}
       <section className="py-16 sm:py-24 bg-accent/30">
+        <div className="mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground">Kurumsal Araçlar</h2>
+            <p className="mt-4 text-muted-foreground">Hemen kullanmaya başlayabileceğiniz ücretsiz araçlar</p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
+            <a
+              href="/araclar/txt-parser.html"
+              className="group flex items-center gap-4 rounded-xl border bg-card p-6 transition-all hover:border-purple-500/50 hover:bg-purple-500/5"
+            >
+              <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                <FileText className="h-6 w-6 text-purple-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground group-hover:text-purple-500 transition-colors">
+                  Optik TXT Parser
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Optixy formatındaki dosyaları analiz edin
+                </p>
+              </div>
+              <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-purple-500 transition-colors" />
+            </a>
+            <div className="group flex items-center gap-4 rounded-xl border bg-card p-6 opacity-60 cursor-not-allowed">
+              <div className="h-12 w-12 rounded-lg bg-pink-500/10 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="h-6 w-6 text-pink-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">
+                  AI Soru Üretici
+                  <span className="ml-2 text-xs font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                    Yakında
+                  </span>
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  MEB formatında özgün sorular üretin
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground">Paketler</h2>
