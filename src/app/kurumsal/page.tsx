@@ -384,14 +384,15 @@ export default function KurumsalPage() {
                 Ücretsiz Deneyin
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => setMode('login')}
-              >
-                <Building2 className="mr-2 h-4 w-4" />
-                Kurumsal Giriş
-              </Button>
+              <Link href="/kurumsal/giris">
+                <Button
+                  size="lg"
+                  variant="outline"
+                >
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Panele Giriş
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -15,7 +15,17 @@ import {
   X,
   ChevronRight,
   Home,
+  User,
+  Loader2,
 } from 'lucide-react'
+
+interface KurumsalSession {
+  username: string
+  kurumAdi: string
+  yetkili: string
+  email: string
+  loginTime: string
+}
 
 const sidebarItems = [
   { name: 'Panel', href: '/kurumsal/panel', icon: Home },
@@ -34,15 +44,49 @@ export default function KurumsalPanelLayout({
   const router = useRouter()
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [kurumAdi, setKurumAdi] = useState('Demo Kurum')
+  const [session, setSession] = useState<KurumsalSession | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // TODO: Auth check - şimdilik demo mode
+  // Auth check
   useEffect(() => {
-    // Kurumsal auth kontrolü yapılacak
-  }, [])
+    const checkAuth = () => {
+      const sessionData = localStorage.getItem('kurumsal_session')
+      if (sessionData) {
+        try {
+          const parsed = JSON.parse(sessionData) as KurumsalSession
+          setSession(parsed)
+        } catch {
+          localStorage.removeItem('kurumsal_session')
+          router.push('/kurumsal/giris')
+        }
+      } else {
+        router.push('/kurumsal/giris')
+      }
+      setLoading(false)
+    }
+    checkAuth()
+  }, [router])
 
   const handleLogout = () => {
-    router.push('/kurumsal')
+    localStorage.removeItem('kurumsal_session')
+    router.push('/kurumsal/giris')
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mx-auto" />
+          <p className="mt-2 text-sm text-muted-foreground">Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Not authenticated
+  if (!session) {
+    return null
   }
 
   return (
@@ -57,7 +101,7 @@ export default function KurumsalPanelLayout({
         </button>
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-purple-500" />
-          <span className="font-semibold text-sm">{kurumAdi}</span>
+          <span className="font-semibold text-sm truncate max-w-[150px]">{session.kurumAdi}</span>
         </div>
         <div className="w-9" />
       </div>
@@ -78,18 +122,18 @@ export default function KurumsalPanelLayout({
       >
         {/* Logo */}
         <div className="h-14 flex items-center justify-between px-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
               <Building2 className="h-4 w-4 text-purple-500" />
             </div>
-            <div>
-              <div className="font-semibold text-sm text-foreground">{kurumAdi}</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm text-foreground truncate">{session.kurumAdi}</div>
               <div className="text-[10px] text-muted-foreground">Kurumsal Panel</div>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 hover:bg-accent rounded"
+            className="lg:hidden p-1 hover:bg-accent rounded flex-shrink-0"
           >
             <X className="h-4 w-4" />
           </button>
@@ -133,15 +177,30 @@ export default function KurumsalPanelLayout({
           })}
         </nav>
 
-        {/* Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="text-sm">Çıkış Yap</span>
-          </button>
+        {/* User Info & Logout */}
+        <div className="absolute bottom-0 left-0 right-0 border-t border-border">
+          {/* User Info */}
+          <div className="px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-purple-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-foreground truncate">{session.yetkili}</div>
+                <div className="text-xs text-muted-foreground truncate">{session.email}</div>
+              </div>
+            </div>
+          </div>
+          {/* Logout */}
+          <div className="p-3">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors w-full"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm">Çıkış Yap</span>
+            </button>
+          </div>
         </div>
       </aside>
 
