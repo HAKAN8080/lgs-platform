@@ -31,7 +31,7 @@ const sidebarItems = [
   { name: 'Panel', href: '/kurumsal/panel', icon: Home },
   { name: 'Öğrenciler', href: '/kurumsal/panel/ogrenciler', icon: Users },
   { name: 'Sınıflar', href: '/kurumsal/panel/siniflar', icon: GraduationCap },
-  { name: 'Denemeler', href: '/kurumsal/panel/denemeler', icon: FileText, comingSoon: true },
+  { name: 'Denemeler', href: '/kurumsal/panel/denemeler', icon: FileText },
   { name: 'Raporlar', href: '/kurumsal/panel/raporlar', icon: BarChart3, comingSoon: true },
   { name: 'Ayarlar', href: '/kurumsal/panel/ayarlar', icon: Settings, comingSoon: true },
 ]
