@@ -1,14 +1,14 @@
-// LGS 2025 Katsayıları
+// LGS 2025 Katsayıları (MEB resmi formülüne göre)
 export const LGS_COEFFICIENTS = {
-  turkce: 4.349,
-  matematik: 4.254,
+  turkce: 4.348,
+  matematik: 4.2538,
   fen: 4.123,
-  inkilap: 1.667,
+  inkilap: 1.666,
   din: 1.899,
-  ingilizce: 1.508,
+  ingilizce: 1.5075,
 } as const;
 
-export const LGS_CONSTANT = 194.752;
+export const LGS_CONSTANT = 194.752082;
 
 export const QUESTION_COUNTS = {
   turkce: 20,
@@ -73,9 +73,10 @@ export function calculateLGSScore(inputs: Record<string, SubjectInput>): ScoreRe
   }
 
   // Puan = Toplam Katkı + Sabit (200-500 aralığında)
-  const score = Math.min(500, Math.max(200, scoreContribution + LGS_CONSTANT));
+  const rawScore = scoreContribution + LGS_CONSTANT;
+  const score = Math.min(500, Math.max(200, rawScore));
 
-  // Sözel ve Sayısal net
+  // Sözel ve Sayısal net (toplam soru sayıları: sözel 50, sayısal 40)
   const verbalNet = (nets.turkce || 0) + (nets.inkilap || 0) + (nets.din || 0) + (nets.ingilizce || 0);
   const numericalNet = (nets.matematik || 0) + (nets.fen || 0);
 
@@ -92,20 +93,22 @@ export function calculateLGSScore(inputs: Record<string, SubjectInput>): ScoreRe
 // Puan yorumu
 export function getScoreInterpretation(score: number): { label: string; color: string; description: string } {
   if (score >= 480) {
-    return { label: 'Mükemmel', color: '#059669', description: 'Fen Lisesi seviyesi' };
+    return { label: 'Mükemmel', color: '#059669', description: 'Fen Lisesi ve nitelikli okullar seviyesi' };
   } else if (score >= 450) {
-    return { label: 'Çok İyi', color: '#10B981', description: 'İyi Anadolu Lisesi seviyesi' };
+    return { label: 'Çok İyi', color: '#10B981', description: 'İyi Anadolu Liseleri seviyesi' };
   } else if (score >= 400) {
     return { label: 'İyi', color: '#3B82F6', description: 'Anadolu Lisesi seviyesi' };
   } else if (score >= 350) {
-    return { label: 'Orta', color: '#F59E0B', description: 'Geliştirilmeli' };
+    return { label: 'Orta', color: '#F59E0B', description: 'Geliştirilmeli, düzenli çalışma gerekli' };
+  } else if (score >= 250) {
+    return { label: 'Gelişmeli', color: '#EF4444', description: 'Temel eksiklerini kapatmalısın' };
   } else {
-    return { label: 'Gayret', color: '#EF4444', description: 'Daha çok çalışmalısın' };
+    return { label: 'Acil Destek', color: '#7F1A1A', description: 'Konu eksiklerini belirleyip çalışmaya başla' };
   }
 }
 
 // 2025 LGS Yüzdelik Dilim Tahmini (yaklaşık 1.200.000 öğrenci bazında)
-// Kaynak: Önceki yıl verileri ve MEB istatistikleri
+// NOT: Bu değerler tahminidir, gerçek MEB verileri ile güncellenmelidir
 const PERCENTILE_TABLE = [
   { score: 500, percentile: 0.01, rank: 120 },
   { score: 495, percentile: 0.02, rank: 240 },
