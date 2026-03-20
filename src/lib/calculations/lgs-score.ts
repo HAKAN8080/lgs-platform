@@ -157,9 +157,29 @@ export interface PercentileResult {
 
 export function getPercentile(score: number): PercentileResult {
   const totalStudents = 1200000;
+  const highest = PERCENTILE_TABLE[0];
+  const lowest = PERCENTILE_TABLE[PERCENTILE_TABLE.length - 1];
 
-  // Tam eşleşme bul
-  const exact = PERCENTILE_TABLE.find(p => p.score === Math.round(score));
+  if (score >= highest.score) {
+    return {
+      percentile: highest.percentile,
+      rank: highest.rank,
+      totalStudents,
+      topPercent: highest.percentile,
+    };
+  }
+
+  if (score <= lowest.score) {
+    return {
+      percentile: lowest.percentile,
+      rank: lowest.rank,
+      totalStudents,
+      topPercent: lowest.percentile,
+    };
+  }
+
+  // Aynı puan için tam eşleşme varsa doğrudan kullan.
+  const exact = PERCENTILE_TABLE.find(p => p.score === score);
   if (exact) {
     return {
       percentile: exact.percentile,
@@ -170,8 +190,8 @@ export function getPercentile(score: number): PercentileResult {
   }
 
   // İki değer arasında interpolasyon yap
-  let lower = PERCENTILE_TABLE[PERCENTILE_TABLE.length - 1];
-  let upper = PERCENTILE_TABLE[0];
+  let lower = lowest;
+  let upper = highest;
 
   for (let i = 0; i < PERCENTILE_TABLE.length - 1; i++) {
     if (score <= PERCENTILE_TABLE[i].score && score > PERCENTILE_TABLE[i + 1].score) {
@@ -185,11 +205,12 @@ export function getPercentile(score: number): PercentileResult {
   const ratio = (score - lower.score) / (upper.score - lower.score);
   const percentile = lower.percentile - (ratio * (lower.percentile - upper.percentile));
   const rank = Math.round(lower.rank - (ratio * (lower.rank - upper.rank)));
+  const normalizedPercentile = Math.round(Math.max(0.01, Math.min(100, percentile)) * 100) / 100;
 
   return {
-    percentile: Math.max(0.01, Math.min(100, percentile)),
+    percentile: normalizedPercentile,
     rank: Math.max(1, Math.min(totalStudents, rank)),
     totalStudents,
-    topPercent: Math.max(0.01, Math.min(100, percentile)),
+    topPercent: normalizedPercentile,
   };
 }
