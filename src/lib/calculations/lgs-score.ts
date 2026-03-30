@@ -1,14 +1,16 @@
 // LGS 2025 Katsayıları (MEB resmi formülüne göre)
+// Tam net yapınca: 20×4 + 20×4 + 20×4 + 10×2 + 10×2 + 10×2 = 300
+// Taban puan: 200, Maksimum: 500
 export const LGS_COEFFICIENTS = {
-  turkce: 4.348,
-  matematik: 4.2538,
-  fen: 4.123,
-  inkilap: 1.666,
-  din: 1.899,
-  ingilizce: 1.5075,
+  turkce: 4,
+  matematik: 4,
+  fen: 4,
+  inkilap: 2,
+  din: 2,
+  ingilizce: 2,
 } as const;
 
-export const LGS_CONSTANT = 194.752082;
+export const LGS_CONSTANT = 200;
 
 export const QUESTION_COUNTS = {
   turkce: 20,
