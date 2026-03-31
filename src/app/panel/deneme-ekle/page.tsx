@@ -22,26 +22,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import * as XLSX from 'xlsx'
+import { LGS_COEFFICIENTS, LGS_CONSTANT, SUBJECTS } from '@/lib/calculations/lgs-score'
 
-const DERSLER = [
-  { key: 'turkce', label: 'Türkçe', icon: '📖', max: 20, color: '#3B82F6' },
-  { key: 'matematik', label: 'Matematik', icon: '🔢', max: 20, color: '#8B5CF6' },
-  { key: 'fen', label: 'Fen Bilimleri', icon: '🔬', max: 20, color: '#10B981' },
-  { key: 'inkilap', label: 'İnkılap Tarihi', icon: '📜', max: 10, color: '#F59E0B' },
-  { key: 'din', label: 'Din Kültürü', icon: '🕌', max: 10, color: '#EC4899' },
-  { key: 'ingilizce', label: 'İngilizce', icon: '🌍', max: 10, color: '#06B6D4' },
-]
-
-// LGS Katsayıları
-const KATSAYILAR = {
-  turkce: 4.349,
-  matematik: 4.254,
-  fen: 4.123,
-  inkilap: 1.667,
-  din: 1.899,
-  ingilizce: 1.508,
-}
-const SABIT = 194.752
+const DERSLER = SUBJECTS
 
 interface DersInput {
   dogru: number
@@ -173,9 +156,9 @@ export default function DenemeEklePage() {
       const net = Math.max(0, dogru - yanlis / 3)
       netler[ders.key] = net
       toplamNet += net
-      puanKatkisi += net * KATSAYILAR[ders.key as keyof typeof KATSAYILAR]
+      puanKatkisi += net * LGS_COEFFICIENTS[ders.key as keyof typeof LGS_COEFFICIENTS]
     }
-    const puan = Math.min(500, Math.max(200, puanKatkisi + SABIT))
+    const puan = Math.min(500, Math.max(200, puanKatkisi + LGS_CONSTANT))
     return { netler, toplamNet, puan, basariYuzde: 0 }
   }
 
@@ -286,10 +269,10 @@ export default function DenemeEklePage() {
       const net = Math.max(0, dogru - yanlis / 3)
       netler[ders.key] = net
       toplamNet += net
-      puanKatkisi += net * KATSAYILAR[ders.key as keyof typeof KATSAYILAR]
+      puanKatkisi += net * LGS_COEFFICIENTS[ders.key as keyof typeof LGS_COEFFICIENTS]
     }
 
-    const puan = Math.min(500, Math.max(200, puanKatkisi + SABIT))
+    const puan = Math.min(500, Math.max(200, puanKatkisi + LGS_CONSTANT))
     return { netler, toplamNet, puan }
   }
 

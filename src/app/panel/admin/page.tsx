@@ -11,6 +11,9 @@ import {
   isAdmin,
   type License,
 } from '@/lib/firebase/license'
+import { db } from '@/lib/firebase/config'
+import { collection, getDocs, updateDoc, doc, writeBatch } from 'firebase/firestore'
+import { LGS_COEFFICIENTS, LGS_CONSTANT } from '@/lib/calculations/lgs-score'
 import {
   Key,
   Loader2,
@@ -21,6 +24,8 @@ import {
   AlertTriangle,
   User,
   Calendar,
+  RefreshCw,
+  Calculator,
 } from 'lucide-react'
 
 export default function AdminPage() {
@@ -32,6 +37,9 @@ export default function AdminPage() {
   const [note, setNote] = useState('')
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  // Puan migration state
+  const [migrationLoading, setMigrationLoading] = useState(false)
+  const [migrationResult, setMigrationResult] = useState<{ success: boolean; message: string; count?: number } | null>(null)
 
   // Admin kontrolü
   const userIsAdmin = isAdmin(user?.email || null)
@@ -79,6 +87,64 @@ export default function AdminPage() {
     navigator.clipboard.writeText(code)
     setCopiedCode(code)
     setTimeout(() => setCopiedCode(null), 2000)
+  }
+
+  // Tüm denemelerin puanlarını 2025 katsayılarıyla yeniden hesapla
+  const handleRecalculateScores = async () => {
+    if (!db) return
+
+    const confirmed = confirm(
+      'Tüm denemelerin puanları 2025 LGS katsayılarıyla yeniden hesaplanacak. Devam etmek istiyor musunuz?'
+    )
+    if (!confirmed) return
+
+    setMigrationLoading(true)
+    setMigrationResult(null)
+
+    try {
+      const denemelerRef = collection(db, 'denemeler')
+      const snapshot = await getDocs(denemelerRef)
+
+      let updatedCount = 0
+      const batch = writeBatch(db)
+
+      snapshot.docs.forEach((docSnap) => {
+        const data = docSnap.data()
+        const netler = data.netler as Record<string, number> | undefined
+
+        if (!netler) return
+
+        // Yeni puanı hesapla
+        let puanKatkisi = 0
+        for (const [ders, net] of Object.entries(netler)) {
+          const coef = LGS_COEFFICIENTS[ders as keyof typeof LGS_COEFFICIENTS]
+          if (coef) {
+            puanKatkisi += net * coef
+          }
+        }
+        const yeniPuan = Math.min(500, Math.max(200, puanKatkisi + LGS_CONSTANT))
+
+        // Batch update
+        batch.update(doc(db!, 'denemeler', docSnap.id), { puan: yeniPuan })
+        updatedCount++
+      })
+
+      await batch.commit()
+
+      setMigrationResult({
+        success: true,
+        message: `${updatedCount} denemenin puanı başarıyla güncellendi!`,
+        count: updatedCount
+      })
+    } catch (error) {
+      console.error('Migration hatası:', error)
+      setMigrationResult({
+        success: false,
+        message: 'Güncelleme sırasında bir hata oluştu.'
+      })
+    } finally {
+      setMigrationLoading(false)
+    }
   }
 
   if (loading) {
@@ -145,6 +211,48 @@ export default function AdminPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Puan Güncelleme */}
+        <Card className="mb-8 border-orange-500/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5 text-orange-500" />
+              Puan Hesaplama Güncelleme
+            </CardTitle>
+            <CardDescription>
+              Tüm denemelerin puanlarını 2025 LGS katsayılarıyla yeniden hesapla
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20 mb-4">
+              <p className="text-sm text-orange-500">
+                <strong>2025 Katsayıları:</strong> Matematik: 4.65, Türkçe: 4.53, Fen: 4.12, İnkılap: 1.94, Din: 1.99, İngilizce: 1.69
+              </p>
+            </div>
+            <Button
+              onClick={handleRecalculateScores}
+              disabled={migrationLoading}
+              variant="outline"
+              className="border-orange-500/50 text-orange-500 hover:bg-orange-500/10"
+            >
+              {migrationLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Tüm Puanları Yeniden Hesapla
+            </Button>
+            {migrationResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${
+                migrationResult.success
+                  ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                  : 'bg-red-500/10 text-red-500 border border-red-500/20'
+              }`}>
+                {migrationResult.message}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Yeni Lisans Oluştur */}
         <Card className="mb-8">
