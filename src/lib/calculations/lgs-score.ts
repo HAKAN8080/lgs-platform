@@ -1,13 +1,24 @@
-// LGS 2025 Katsayıları (MEB resmi formülüne göre)
-// Tam net yapınca: 20×4 + 20×4 + 20×4 + 10×2 + 10×2 + 10×2 = 300
+// LGS 2025 Net Puan Değerleri (Standart sapma bazlı gerçek veriler)
+// Her yıl soruların zorluk derecesine göre 1 netin getirdiği puan küçük farklılıklar gösterir
+// Kaynak: 2025 LGS verileri
 // Taban puan: 200, Maksimum: 500
 export const LGS_COEFFICIENTS = {
+  turkce: 4.53,      // 20 soru, katsayı 4, ~4.53 puan/net
+  matematik: 4.65,   // 20 soru, katsayı 4, ~4.65 puan/net
+  fen: 4.12,         // 20 soru, katsayı 4, ~4.12 puan/net
+  inkilap: 1.94,     // 10 soru, katsayı 1, ~1.94 puan/net
+  din: 1.99,         // 10 soru, katsayı 1, ~1.99 puan/net
+  ingilizce: 1.69,   // 10 soru, katsayı 1, ~1.69 puan/net
+} as const;
+
+// Teorik katsayılar (referans için)
+export const LGS_BASE_COEFFICIENTS = {
   turkce: 4,
   matematik: 4,
   fen: 4,
-  inkilap: 2,
-  din: 2,
-  ingilizce: 2,
+  inkilap: 1,
+  din: 1,
+  ingilizce: 1,
 } as const;
 
 export const LGS_CONSTANT = 200;
