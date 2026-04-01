@@ -1,0 +1,98 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin email listesi
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email in ['admin@thorius.com.tr'];
+    }
+
+    // Giriş yapmış kullanıcı mı?
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Kendi verisi mi?
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ============================================
+    // USERS - Kullanıcı profilleri
+    // ============================================
+    match /users/{userId} {
+      // Okuma: Sadece kendi profilini okuyabilir
+      allow read: if isOwner(userId);
+
+      // Oluşturma: Giriş yapmış ve kendi uid'si ile oluşturuyorsa
+      allow create: if isOwner(userId) &&
+                       request.resource.data.uid == userId;
+
+      // Güncelleme: Sadece kendi profilini güncelleyebilir
+      // Subscription alanını sadece admin veya sistem güncelleyebilir
+      allow update: if isOwner(userId) && (
+        // Normal profil güncellemesi (subscription hariç)
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscription']) ||
+        // Subscription güncellemesi sadece license aktivasyonu için
+        (request.resource.data.subscription.keys().hasAll(['plan', 'status']) &&
+         request.resource.data.subscription.plan in ['free', 'premium', 'premium_plus'])
+      );
+
+      // Silme: İzin yok
+      allow delete: if false;
+    }
+
+    // ============================================
+    // LICENSES - Lisans kodları
+    // ============================================
+    match /licenses/{licenseId} {
+      // Okuma: Giriş yapmış kullanıcı lisans kodunu kontrol edebilir
+      allow read: if isAuthenticated();
+
+      // Oluşturma: Sadece admin
+      allow create: if isAdmin();
+
+      // Güncelleme: Giriş yapmış kullanıcı - sadece aktivasyon için
+      // Kullanılmamış lisansı kendi uid'si ile aktive edebilir
+      allow update: if isAuthenticated() &&
+                       resource.data.used == false &&
+                       request.resource.data.used == true &&
+                       request.resource.data.usedBy == request.auth.uid;
+
+      // Silme: Sadece admin
+      allow delete: if isAdmin();
+    }
+
+    // ============================================
+    // DENEMELER - Deneme sınav sonuçları
+    // ============================================
+    match /denemeler/{denemeId} {
+      // Okuma: Sadece kendi denemelerini okuyabilir
+      allow read: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+
+      // Oluşturma: Giriş yapmış ve kendi userId'si ile oluşturuyorsa
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Güncelleme: Sadece kendi denemelerini güncelleyebilir
+      // userId değiştirilemez
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Silme: Sadece kendi denemelerini silebilir
+      allow delete: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+    }
+
+    // ============================================
+    // Diğer tüm koleksiyonlar - Varsayılan olarak kapat
+    // ============================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
