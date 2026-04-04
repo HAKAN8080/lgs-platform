@@ -8,10 +8,10 @@ import { signOut } from '@/lib/firebase/auth'
 import { useRouter } from 'next/navigation'
 
 const navigation = [
-  { name: 'LGS Puan Hesapla', href: '/araclar/puan-hesaplama' },
-  { name: 'Taban Puanları - İstanbul', href: '/araclar/taban-puanlari' },
+  { name: 'Puan Hesapla', href: '/araclar/puan-hesaplama' },
+  { name: 'Taban Puanları', href: '/araclar/taban-puanlari' },
   { name: 'Soru Dağılımı', href: '/icerik/soru-dagilimi' },
-  { name: '2025 İstatistikleri', href: '/icerik/istatistikler' },
+  { name: 'İstatistikler', href: '/icerik/istatistikler' },
   { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
   {
     name: 'Araçlar',
@@ -23,7 +23,6 @@ const navigation = [
       { name: 'Çalışma Stratejileri', href: '/icerik/stratejiler' },
     ],
   },
-  { name: 'Öğrenci Paneli', href: '/panel' },
   {
     name: 'Premium',
     href: '/premium',
@@ -83,24 +82,24 @@ export function Header() {
         </div>
 
         {/* Desktop navigation */}
-        <div className="hidden lg:flex lg:gap-x-8">
+        <div className="hidden lg:flex lg:gap-x-6">
           {navigation.map((item) => (
             <div key={item.name} className="relative group">
               <Link
                 href={item.href}
-                className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                {item.icon && <item.icon className="h-4 w-4 text-yellow-500" />}
+                {item.icon && <item.icon className="h-3.5 w-3.5 text-yellow-500" />}
                 {item.name}
               </Link>
               {item.children && (
-                <div className="absolute left-0 top-full mt-2 w-48 rounded-md bg-popover border border-border shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="absolute left-0 top-full mt-2 w-44 rounded-md bg-popover border border-border shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="py-1">
                     {item.children.map((child) => (
                       <Link
                         key={child.name}
                         href={child.href}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                        className="block px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                       >
                         {child.name}
                       </Link>
