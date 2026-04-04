@@ -1,14 +1,12 @@
-// LGS 2025 Net Puan Değerleri (Standart sapma bazlı gerçek veriler)
-// Her yıl soruların zorluk derecesine göre 1 netin getirdiği puan küçük farklılıklar gösterir
-// Kaynak: 2025 LGS verileri
-// Taban puan: 200, Maksimum: 500
+// LGS Resmi Puan Katsayıları
+// Kaynak: MEB LGS puan hesaplama formülü
 export const LGS_COEFFICIENTS = {
-  turkce: 4.53,      // 20 soru, katsayı 4, ~4.53 puan/net
-  matematik: 4.65,   // 20 soru, katsayı 4, ~4.65 puan/net
-  fen: 4.12,         // 20 soru, katsayı 4, ~4.12 puan/net
-  inkilap: 1.94,     // 10 soru, katsayı 1, ~1.94 puan/net
-  din: 1.99,         // 10 soru, katsayı 1, ~1.99 puan/net
-  ingilizce: 1.69,   // 10 soru, katsayı 1, ~1.69 puan/net
+  turkce: 4.348,
+  matematik: 4.2538,
+  fen: 4.1230,
+  inkilap: 1.666,
+  din: 1.899,
+  ingilizce: 1.5075,
 } as const;
 
 // Teorik katsayılar (referans için)
@@ -21,7 +19,8 @@ export const LGS_BASE_COEFFICIENTS = {
   ingilizce: 1,
 } as const;
 
-export const LGS_CONSTANT = 200;
+// Resmi sabit katsayı
+export const LGS_CONSTANT = 194.752082;
 
 export const QUESTION_COUNTS = {
   turkce: 20,
@@ -66,6 +65,7 @@ export function calculateNet(correct: number, wrong: number): number {
 }
 
 // LGS Puan hesaplama
+// Formül: Σ(Net × Katsayı) + Sabit
 export function calculateLGSScore(inputs: Record<string, SubjectInput>): ScoreResult {
   const nets: Record<string, number> = {};
   const breakdown: Record<string, SubjectResult> = {};
@@ -85,7 +85,7 @@ export function calculateLGSScore(inputs: Record<string, SubjectInput>): ScoreRe
     breakdown[subject] = { net, contribution };
   }
 
-  // Puan = Toplam Katkı + Sabit (200-500 aralığında)
+  // Resmi LGS formülü: Toplam Katkı + Sabit Katsayı
   const rawScore = scoreContribution + LGS_CONSTANT;
   const score = Math.min(500, Math.max(200, rawScore));
 
