@@ -15,6 +15,10 @@ const footerLinks = {
     { name: 'Öğrenci Paneli', href: '/panel' },
     { name: 'Premium', href: '/premium' },
   ],
+  yasal: [
+    { name: 'Gizlilik Politikası', href: '/gizlilik' },
+    { name: 'Kullanım Şartları', href: '/kullanim-sartlari' },
+  ],
 }
 
 export function Footer() {
@@ -88,9 +92,22 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-border pt-8">
-          <p className="text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} LGS Hazırlık Platformu. Tüm hakları saklıdır.
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              &copy; {new Date().getFullYear()} LGS Hazırlık Platformu. Tüm hakları saklıdır.
+            </p>
+            <div className="flex gap-4">
+              {footerLinks.yasal.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </footer>
