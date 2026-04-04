@@ -8,27 +8,21 @@ import { signOut } from '@/lib/firebase/auth'
 import { useRouter } from 'next/navigation'
 
 const navigation = [
+  { name: 'LGS Puan Hesapla', href: '/araclar/puan-hesaplama' },
+  { name: 'Taban Puanları - İstanbul', href: '/araclar/taban-puanlari' },
+  { name: 'Soru Dağılımı', href: '/icerik/soru-dagilimi' },
+  { name: '2025 İstatistikleri', href: '/icerik/istatistikler' },
   {
     name: 'Araçlar',
     href: '/araclar',
     children: [
-      { name: 'LGS Puan Hesaplama', href: '/araclar/puan-hesaplama' },
-      { name: 'Lise Taban Puanları', href: '/araclar/taban-puanlari' },
       { name: 'Net Takip', href: '/panel/net-takip' },
       { name: 'Haftalık Strateji', href: '/panel/strateji' },
       { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
       { name: 'Çalışma Programı', href: '/icerik/calisma-programi' },
+      { name: 'Çalışma Stratejileri', href: '/icerik/stratejiler' },
       { name: 'Optik TXT Parser', href: '/araclar/txt-parser.html' },
       { name: 'AI Soru Üretici', href: '/araclar/lgs-soru-uretici.html' },
-    ],
-  },
-  {
-    name: 'İçerik',
-    href: '/icerik',
-    children: [
-      { name: 'Soru Dağılımı', href: '/icerik/soru-dagilimi' },
-      { name: '2025 İstatistikleri', href: '/icerik/istatistikler' },
-      { name: 'Çalışma Stratejileri', href: '/icerik/stratejiler' },
     ],
   },
   { name: 'Öğrenci Paneli', href: '/panel' },
