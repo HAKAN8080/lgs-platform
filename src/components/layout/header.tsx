@@ -12,22 +12,34 @@ const navigation = [
   { name: 'Taban Puanları - İstanbul', href: '/araclar/taban-puanlari' },
   { name: 'Soru Dağılımı', href: '/icerik/soru-dagilimi' },
   { name: '2025 İstatistikleri', href: '/icerik/istatistikler' },
+  { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
   {
     name: 'Araçlar',
     href: '/araclar',
     children: [
       { name: 'Net Takip', href: '/panel/net-takip' },
       { name: 'Haftalık Strateji', href: '/panel/strateji' },
-      { name: 'Tercih Robotu', href: '/araclar/tercih-robotu' },
       { name: 'Çalışma Programı', href: '/icerik/calisma-programi' },
       { name: 'Çalışma Stratejileri', href: '/icerik/stratejiler' },
-      { name: 'Optik TXT Parser', href: '/araclar/txt-parser.html' },
-      { name: 'AI Soru Üretici', href: '/araclar/lgs-soru-uretici.html' },
     ],
   },
   { name: 'Öğrenci Paneli', href: '/panel' },
-  { name: 'Premium', href: '/premium', icon: Crown },
-  { name: 'Kurumsal', href: '/kurumsal', icon: Building2 },
+  {
+    name: 'Premium',
+    href: '/premium',
+    icon: Crown,
+    children: [
+      { name: 'AI Soru Üretici', href: '/araclar/lgs-soru-uretici.html' },
+    ],
+  },
+  {
+    name: 'Kurumsal',
+    href: '/kurumsal',
+    icon: Building2,
+    children: [
+      { name: 'Optik TXT Parser', href: '/araclar/txt-parser.html' },
+    ],
+  },
 ]
 
 export function Header() {
