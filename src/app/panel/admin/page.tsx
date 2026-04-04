@@ -226,7 +226,7 @@ export default function AdminPage() {
           <CardContent>
             <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20 mb-4">
               <p className="text-sm text-orange-500">
-                <strong>2025 Katsayıları:</strong> Matematik: 4.65, Türkçe: 4.53, Fen: 4.12, İnkılap: 1.94, Din: 1.99, İngilizce: 1.69
+                <strong>MEB Resmi Katsayıları:</strong> Türkçe: 4.348, Matematik: 4.2538, Fen: 4.123, İnkılap: 1.666, Din: 1.899, İngilizce: 1.5075 | Sabit: 194.75
               </p>
             </div>
             <Button
