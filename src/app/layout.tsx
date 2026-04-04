@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'LGS Hazırlık' }],
   creator: 'LGS Hazırlık',
   metadataBase: new URL('https://lgs.thorius.com.tr'),
+  other: {
+    'google-adsense-account': 'ca-pub-3325810744415018',
+  },
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
@@ -47,7 +50,6 @@ export default function RootLayout({
   return (
     <html lang="tr" className="dark">
       <head>
-        <meta name="google-adsense-account" content="ca-pub-3325810744415018" />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-RG6JSELP8E"
           strategy="afterInteractive"
