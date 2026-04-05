@@ -4,6 +4,24 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, onAuthStateChanged } from 'firebase/auth'
 import { auth, isFirebaseConfigured } from '@/lib/firebase/config'
 import { getUserData } from '@/lib/firebase/auth'
+import {
+  type PlanType,
+  type FeatureKey,
+  hasAccess,
+  getFeatureStatus,
+  FEATURE_LIMITS,
+} from '@/lib/constants/plans'
+
+// Plan mapping: eski sistem -> yeni sistem
+const PLAN_MAPPING: Record<string, PlanType> = {
+  'free': 'basic',
+  'basic': 'basic',
+  'premium': 'pro',
+  'pro': 'pro',
+  'premium_plus': 'elite',
+  'elite': 'elite',
+  'kurumsal': 'kurumsal',
+}
 
 interface UserData {
   uid: string
@@ -11,7 +29,7 @@ interface UserData {
   displayName: string
   photoURL: string | null
   subscription: {
-    plan: 'free' | 'premium' | 'premium_plus'
+    plan: 'free' | 'premium' | 'premium_plus' | 'basic' | 'pro' | 'elite' | 'kurumsal'
     status: string
   }
   profile: {
@@ -93,12 +111,62 @@ export function useAuth() {
   return context
 }
 
-// Premium kontrolü için yardımcı hook
+// Plan hook'u - yeni sistem
+export function usePlan() {
+  const { userData } = useAuth()
+  const rawPlan = userData?.subscription.plan || 'free'
+  const plan: PlanType = PLAN_MAPPING[rawPlan] || 'basic'
+
+  return {
+    plan,
+    isBasic: plan === 'basic',
+    isPro: plan === 'pro',
+    isElite: plan === 'elite',
+    isKurumsal: plan === 'kurumsal',
+    // Eski uyumluluk için
+    isPremium: plan === 'pro' || plan === 'elite',
+    isPremiumPlus: plan === 'elite',
+  }
+}
+
+// Özellik erişim hook'u
+export function useFeature(feature: FeatureKey) {
+  const { plan } = usePlan()
+
+  const canAccess = hasAccess(plan, feature)
+  const status = getFeatureStatus(plan, feature)
+  const limit = FEATURE_LIMITS[feature]?.[plan] ?? -1
+
+  return {
+    canAccess,
+    status,
+    limit,
+    isLimited: status === 'limited',
+    isLocked: status === 'locked',
+    isComingSoon: status === 'coming_soon',
+  }
+}
+
+// Birden fazla özellik kontrolü
+export function useFeatures(features: FeatureKey[]) {
+  const { plan } = usePlan()
+
+  return features.map(feature => ({
+    feature,
+    canAccess: hasAccess(plan, feature),
+    status: getFeatureStatus(plan, feature),
+  }))
+}
+
+// Premium kontrolü için yardımcı hook (geriye uyumluluk)
 export function usePremium() {
   const { userData } = useAuth()
+  const rawPlan = userData?.subscription.plan || 'free'
+  const plan: PlanType = PLAN_MAPPING[rawPlan] || 'basic'
+
   return {
-    isPremium: userData?.subscription.plan === 'premium' || userData?.subscription.plan === 'premium_plus',
-    isPremiumPlus: userData?.subscription.plan === 'premium_plus',
-    plan: userData?.subscription.plan || 'free',
+    isPremium: plan === 'pro' || plan === 'elite',
+    isPremiumPlus: plan === 'elite',
+    plan: plan,
   }
 }

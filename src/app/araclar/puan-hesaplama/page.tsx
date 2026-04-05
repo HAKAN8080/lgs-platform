@@ -238,7 +238,7 @@ export default function PuanHesaplamaPage() {
                 </div>
                 <div className="mt-3 text-xs text-muted-foreground text-center">
                   <Users className="h-3 w-3 inline mr-1" />
-                  Tahmini ~1.2 milyon öğrenci bazında
+                  Tahmini ~1.1 milyon öğrenci bazında
                 </div>
               </div>
             </Card>

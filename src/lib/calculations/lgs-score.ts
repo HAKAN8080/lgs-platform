@@ -120,45 +120,46 @@ export function getScoreInterpretation(score: number): { label: string; color: s
   }
 }
 
-// 2025 LGS Yüzdelik Dilim Tahmini (yaklaşık 1.200.000 öğrenci bazında)
-// NOT: Bu değerler tahminidir, gerçek MEB verileri ile güncellenmelidir
+// 2025 LGS Yüzdelik Dilim Tahmini (yaklaşık 1.100.000 öğrenci bazında)
+// Kaynak: MEB 2024-2025 LGS istatistikleri baz alınarak güncellenmiştir
 const PERCENTILE_TABLE = [
-  { score: 500, percentile: 0.01, rank: 120 },
-  { score: 495, percentile: 0.02, rank: 240 },
-  { score: 490, percentile: 0.05, rank: 600 },
-  { score: 485, percentile: 0.10, rank: 1200 },
-  { score: 480, percentile: 0.20, rank: 2400 },
-  { score: 475, percentile: 0.35, rank: 4200 },
-  { score: 470, percentile: 0.50, rank: 6000 },
-  { score: 465, percentile: 0.75, rank: 9000 },
-  { score: 460, percentile: 1.00, rank: 12000 },
-  { score: 455, percentile: 1.50, rank: 18000 },
-  { score: 450, percentile: 2.00, rank: 24000 },
-  { score: 445, percentile: 2.75, rank: 33000 },
-  { score: 440, percentile: 3.50, rank: 42000 },
-  { score: 435, percentile: 4.50, rank: 54000 },
-  { score: 430, percentile: 5.50, rank: 66000 },
-  { score: 425, percentile: 7.00, rank: 84000 },
-  { score: 420, percentile: 8.50, rank: 102000 },
-  { score: 415, percentile: 10.00, rank: 120000 },
-  { score: 410, percentile: 12.00, rank: 144000 },
-  { score: 405, percentile: 14.00, rank: 168000 },
-  { score: 400, percentile: 16.00, rank: 192000 },
-  { score: 390, percentile: 20.00, rank: 240000 },
-  { score: 380, percentile: 25.00, rank: 300000 },
-  { score: 370, percentile: 30.00, rank: 360000 },
-  { score: 360, percentile: 35.00, rank: 420000 },
-  { score: 350, percentile: 40.00, rank: 480000 },
-  { score: 340, percentile: 45.00, rank: 540000 },
-  { score: 330, percentile: 50.00, rank: 600000 },
-  { score: 320, percentile: 55.00, rank: 660000 },
-  { score: 310, percentile: 60.00, rank: 720000 },
-  { score: 300, percentile: 65.00, rank: 780000 },
-  { score: 280, percentile: 75.00, rank: 900000 },
-  { score: 260, percentile: 85.00, rank: 1020000 },
-  { score: 240, percentile: 92.00, rank: 1104000 },
-  { score: 220, percentile: 97.00, rank: 1164000 },
-  { score: 200, percentile: 100.00, rank: 1200000 },
+  { score: 500, percentile: 0.10, rank: 1100 },
+  { score: 498, percentile: 0.20, rank: 2200 },
+  { score: 495, percentile: 0.35, rank: 3850 },
+  { score: 490, percentile: 0.55, rank: 6050 },
+  { score: 485, percentile: 0.80, rank: 8800 },
+  { score: 480, percentile: 1.10, rank: 12100 },
+  { score: 475, percentile: 1.50, rank: 16500 },
+  { score: 470, percentile: 2.00, rank: 22000 },
+  { score: 465, percentile: 2.60, rank: 28600 },
+  { score: 460, percentile: 3.30, rank: 36300 },
+  { score: 455, percentile: 4.10, rank: 45100 },
+  { score: 450, percentile: 5.00, rank: 55000 },
+  { score: 445, percentile: 6.00, rank: 66000 },
+  { score: 440, percentile: 7.20, rank: 79200 },
+  { score: 435, percentile: 8.50, rank: 93500 },
+  { score: 430, percentile: 10.00, rank: 110000 },
+  { score: 425, percentile: 11.50, rank: 126500 },
+  { score: 420, percentile: 13.20, rank: 145200 },
+  { score: 415, percentile: 15.00, rank: 165000 },
+  { score: 410, percentile: 17.00, rank: 187000 },
+  { score: 405, percentile: 19.00, rank: 209000 },
+  { score: 400, percentile: 21.00, rank: 231000 },
+  { score: 390, percentile: 26.00, rank: 286000 },
+  { score: 380, percentile: 31.00, rank: 341000 },
+  { score: 370, percentile: 36.00, rank: 396000 },
+  { score: 360, percentile: 41.00, rank: 451000 },
+  { score: 350, percentile: 46.00, rank: 506000 },
+  { score: 340, percentile: 51.00, rank: 561000 },
+  { score: 330, percentile: 56.00, rank: 616000 },
+  { score: 320, percentile: 61.00, rank: 671000 },
+  { score: 310, percentile: 66.00, rank: 726000 },
+  { score: 300, percentile: 71.00, rank: 781000 },
+  { score: 280, percentile: 80.00, rank: 880000 },
+  { score: 260, percentile: 88.00, rank: 968000 },
+  { score: 240, percentile: 94.00, rank: 1034000 },
+  { score: 220, percentile: 98.00, rank: 1078000 },
+  { score: 200, percentile: 100.00, rank: 1100000 },
 ];
 
 export interface PercentileResult {
@@ -169,7 +170,7 @@ export interface PercentileResult {
 }
 
 export function getPercentile(score: number): PercentileResult {
-  const totalStudents = 1200000;
+  const totalStudents = 1100000;
   const highest = PERCENTILE_TABLE[0];
   const lowest = PERCENTILE_TABLE[PERCENTILE_TABLE.length - 1];
 

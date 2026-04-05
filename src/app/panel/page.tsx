@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useAuth, usePremium } from '@/contexts/auth-context'
+import { useAuth, usePremium, usePlan } from '@/contexts/auth-context'
 import { signOut } from '@/lib/firebase/auth'
 import { activateLicense } from '@/lib/firebase/license'
 import { db } from '@/lib/firebase/config'
@@ -107,7 +107,8 @@ const panelFeatures = [
 export default function PanelPage() {
   const router = useRouter()
   const { user, userData, loading } = useAuth()
-  const { isPremium, plan } = usePremium()
+  const { isPremium } = usePremium()
+  const { plan, isElite, isPro } = usePlan()
   const [denemeler, setDenemeler] = useState<Deneme[]>([])
   const [loadingDenemeler, setLoadingDenemeler] = useState(true)
   const [daysUntilLGS, setDaysUntilLGS] = useState(0)
@@ -365,13 +366,13 @@ export default function PanelPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              plan === 'premium_plus'
-                ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-500'
-                : plan === 'premium'
-                ? 'bg-purple-500/20 text-purple-500'
+              isElite
+                ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-500'
+                : isPro
+                ? 'bg-blue-500/20 text-blue-500'
                 : 'bg-muted text-muted-foreground'
             }`}>
-              {plan === 'premium_plus' ? 'Premium+' : plan === 'premium' ? 'Premium' : 'Ücretsiz'}
+              {isElite ? 'Elite' : isPro ? 'Pro' : 'Basic'}
             </div>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
