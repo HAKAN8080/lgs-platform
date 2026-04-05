@@ -86,7 +86,7 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    const lgsDate = new Date('2026-06-14T10:00:00').getTime()
+    const lgsDate = new Date('2026-06-13T09:30:00').getTime()
     const calculateTimeLeft = () => {
       const now = new Date().getTime()
       const diff = lgsDate - now
